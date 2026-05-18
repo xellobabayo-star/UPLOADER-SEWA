@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PENDOSA BYPASS AUDIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- App -->
+<div id="app" style="display:none">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="logo">PENDOSA <span>BYPASS AUDIO</span></div>
+    </div>
+    <div class="nav-right">
+      <span id="navTierBadge" class="tier-badge"></span>
+      <span id="navUsername" class="nav-username"></span>
+      <img id="navAvatar" class="avatar" src="" alt=""/>
+      <a href="/auth/logout" class="btn btn-ghost btn-sm">LOGOUT</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <div class="nav-section">MENU</div>
+      <div class="nav-item active" onclick="showPage('dashboard');closeSidebar()" data-page="dashboard"><span class="icon">⚡</span>DASHBOARD</div>
+      <div class="nav-item" onclick="showPage('upload');closeSidebar()" data-page="upload"><span class="icon">📤</span>UPLOAD</div>
+      <div class="nav-item" onclick="showPage('history');closeSidebar()" data-page="history"><span class="icon">📋</span>HISTORY</div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">AKUN</div>
+      <div class="nav-item" onclick="showPage('settings');closeSidebar()" data-page="settings"><span class="icon">⚙️</span>SETTINGS</div>
+      <div class="nav-item" onclick="showPage('upgrade');closeSidebar()" data-page="upgrade"><span class="icon">🚀</span>UPGRADE TIER</div>
+      <div class="nav-divider"></div>
+      <div id="adminNav" style="display:none">
+        <div class="nav-section">ADMIN</div>
+        <div class="nav-item" onclick="showPage('admin');closeSidebar()" data-page="admin"><span class="icon">👑</span>ADMIN PANEL</div>
+      </div>
+    </aside>
+
+    <main>
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page active">
+
+        <!-- Welcome banner -->
+        <div style="position:relative;overflow:hidden;background:linear-gradient(135deg,rgba(0,245,255,0.06),rgba(255,45,120,0.06));border:1px solid var(--border);border-radius:8px;padding:22px 24px;margin-bottom:20px">
+          <div style="position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--cyan),var(--pink))"></div>
+          <div style="position:absolute;right:-20px;top:-20px;width:120px;height:120px;background:radial-gradient(circle,rgba(0,245,255,0.1),transparent 70%);border-radius:50%"></div>
+          <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);letter-spacing:2px;margin-bottom:4px">SELAMAT DATANG KEMBALI</div>
+          <div style="font-family:var(--font-hd);font-size:1.3rem;font-weight:900;color:var(--text)" id="welcomeName">—</div>
+          <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);margin-top:6px" id="welcomeSub">Loading...</div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="stat-card" style="cursor:default">
+            <div style="font-size:1.5rem;margin-bottom:6px">📤</div>
+            <div class="stat-val" id="statUsed" style="font-size:2.2rem">0</div>
+            <div class="stat-label">UPLOAD BULAN INI</div>
+          </div>
+          <div class="stat-card" style="cursor:default">
+            <div style="font-size:1.5rem;margin-bottom:6px">📊</div>
+            <div class="stat-val pink" id="statRemaining" style="font-size:2.2rem">0</div>
+            <div class="stat-label">SISA KUOTA</div>
+          </div>
+          <div class="stat-card" style="cursor:default">
+            <div style="font-size:1.5rem;margin-bottom:6px">🎯</div>
+            <div class="stat-val yellow" id="statLimit" style="font-size:2.2rem">0</div>
+            <div class="stat-label">LIMIT BULANAN</div>
+          </div>
+        </div>
+
+        <!-- Quota bar card -->
+        <div class="card">
+          <div class="card-title">KUOTA BULANAN</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-family:var(--font-mono);font-size:0.8rem;color:var(--text)" id="quotaText">0 / 0</span>
+            <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--muted)" id="resetText"></span>
+          </div>
+          <div class="quota-bar" style="height:10px;border-radius:5px"><div class="quota-fill" id="quotaFill" style="width:0%;border-radius:5px;transition:width 1s ease"></div></div>
+          <div style="display:flex;justify-content:space-between;margin-top:6px">
+            <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--muted)">0</span>
+            <span style="font-family:var(--font-mono);font-size:0.65rem;color:var(--muted)" id="quotaMax">—</span>
+          </div>
+        </div>
+
+        <!-- Tier + upgrade -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+          <div class="card" style="margin:0;display:flex;flex-direction:column;justify-content:space-between">
+            <div class="card-title">TIER AKTIF</div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+              <div id="dashTierIcon" style="font-size:2.5rem">—</div>
+              <div>
+                <div id="dashTierBadge" style="font-family:var(--font-hd);font-size:1.4rem;font-weight:900"></div>
+                <div id="dashTierDesc" style="font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);margin-top:2px"></div>
+              </div>
+            </div>
+            <button class="btn btn-primary btn-sm" style="width:100%" onclick="showPage('upgrade')">🚀 UPGRADE</button>
+          </div>
+          <div class="card" style="margin:0">
+            <div class="card-title">💰 PAYMENT</div>
+            <div style="font-family:var(--font-mono);font-size:0.72rem;color:var(--muted);margin-bottom:8px">Metode pembayaran:</div>
+            <div style="font-family:var(--font-hd);font-size:1rem;color:var(--green);margin-bottom:10px">💰 DANA</div>
+            <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--muted)">Nomor Admin:</div>
+            <div style="font-family:var(--font-hd);font-size:0.9rem;color:var(--cyan);letter-spacing:1px;margin-bottom:14px">0887-1467-543</div>
+            <button class="btn btn-ghost btn-sm" style="width:100%" onclick="showPage('upgrade')">UPGRADE TIER</button>
+          </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="card">
+          <div class="card-title">QUICK START</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px">
+            <button class="btn btn-primary" onclick="showPage('upload')" style="flex-direction:column;padding:16px;height:auto;gap:4px">
+              <span style="font-size:1.5rem">📤</span>
+              <span>UPLOAD AUDIO</span>
+            </button>
+            <button class="btn btn-ghost" onclick="showPage('history')" style="flex-direction:column;padding:16px;height:auto;gap:4px">
+              <span style="font-size:1.5rem">📋</span>
+              <span>HISTORY</span>
+            </button>
+            <button class="btn btn-ghost" onclick="showPage('settings')" style="flex-direction:column;padding:16px;height:auto;gap:4px">
+              <span style="font-size:1.5rem">⚙️</span>
+              <span>SETTINGS</span>
+            </button>
+            <button class="btn btn-ghost" onclick="showPage('upgrade')" style="flex-direction:column;padding:16px;height:auto;gap:4px;border-color:rgba(255,215,0,0.3);color:var(--yellow)">
+              <span style="font-size:1.5rem">⭐</span>
+              <span>UPGRADE</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD -->
+      <div id="page-upload" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">
+          📤 UPLOAD AUDIO
+        </div>
+
+        <div class="card">
+          <div class="card-title">ROBLOX SETTINGS</div>
+          <div id="noApiKeyWarn" style="display:none;padding:10px;background:rgba(255,230,0,0.05);border:1px solid rgba(255,230,0,0.3);border-radius:4px;margin-bottom:14px;font-family:var(--font-mono);font-size:0.75rem;color:var(--yellow)">
+            ⚠️ Kamu belum menyimpan API Key. <span style="cursor:pointer;text-decoration:underline" onclick="showPage('settings')">Pergi ke Settings</span>
+          </div>
+          <div id="apiKeyOk" style="display:none;padding:10px;background:rgba(0,255,159,0.05);border:1px solid rgba(0,255,159,0.3);border-radius:4px;margin-bottom:14px;font-family:var(--font-mono);font-size:0.75rem;color:var(--green)">
+            ✅ API Key tersimpan — siap upload
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">FILE AUDIO</div>
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()"
+            ondragover="event.preventDefault();this.classList.add('drag')"
+            ondragleave="this.classList.remove('drag')"
+            ondrop="handleDrop(event)">
+            <span class="dz-icon">🎵</span>
+            <div class="dz-text">KLIK ATAU DRAG & DROP FILE AUDIO</div>
+            <div class="dz-sub">MP3 · WAV · OGG · FLAC · AAC — MAX 150MB/FILE</div>
+          </div>
+          <input type="file" id="fileInput" accept="audio/*" multiple style="display:none" onchange="handleFiles(this.files)"/>
+
+          <div id="fileListWrap" style="display:none;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--muted)" id="fileListSummary"></span>
+              <button class="btn btn-ghost btn-sm" onclick="clearFileList()">✕ HAPUS SEMUA</button>
+            </div>
+            <div id="fileListItems" style="display:flex;flex-direction:column;gap:4px;max-height:250px;overflow-y:auto"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">AUDIO OPTIONS</div>
+          <div class="slider-wrap">
+            <div class="slider-label">
+              <label>UPLOAD SPEED (TEMPO)</label>
+              <span class="slider-val" id="speedVal">1.0×</span>
+            </div>
+            <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.05" value="1.0" oninput="updateSlider('speed',this.value,'×')"/>
+            <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);margin-top:4px">Speed > 1× = gunakan PlaybackSpeed di Roblox</div>
+          </div>
+          <div class="slider-wrap">
+            <div class="slider-label">
+              <label>PITCH SHIFT</label>
+              <span class="slider-val" id="pitchVal">0 st</span>
+            </div>
+            <input type="range" id="pitchSlider" min="-12" max="12" step="1" value="0" oninput="updateSlider('pitch',this.value,' st')"/>
+          </div>
+          <div class="switch-wrap">
+            <span class="switch-label">VOLUME NORMALIZATION</span>
+            <label class="switch"><input type="checkbox" id="normalizeToggle" checked/><span class="switch-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">UPLOAD PROGRESS</div>
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-text" id="progressText">Siap upload</div>
+          </div>
+          <button class="btn btn-primary" id="uploadBtn" onclick="startUpload()" disabled>
+            ⚡ MULAI UPLOAD
+          </button>
+        </div>
+
+        <div class="card" id="uploadLogCard" style="display:none">
+          <div class="card-title">UPLOAD LOG</div>
+          <ul class="log-list" id="logList"></ul>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="page-history" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">📋 HISTORY</div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">RIWAYAT UPLOAD</div>
+            <button class="btn btn-ghost btn-sm" onclick="loadHistory()">🔄 REFRESH</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>FILE</th><th>ASSET ID</th><th>STATUS</th><th>TANGGAL</th></tr></thead>
+              <tbody id="historyBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="page-settings" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">⚙️ SETTINGS</div>
+        <div class="card">
+          <div class="card-title">ROBLOX CREDENTIALS</div>
+          <div class="input-group">
+            <label>CREATOR TYPE</label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" id="toggleUser" onclick="setCreatorType('user')">👤 PERSONAL</button>
+              <button class="toggle-btn" id="toggleGroup" onclick="setCreatorType('group')">👥 GROUP</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>USER ID ROBLOX</label>
+            <input type="text" id="setUserId" placeholder="Contoh: 8879389684"/>
+          </div>
+          <div class="input-group" id="groupIdWrap" style="display:none">
+            <label>GROUP ID ROBLOX</label>
+            <input type="text" id="setGroupId" placeholder="Contoh: 12345678"/>
+          </div>
+          <div class="input-group">
+            <label>API KEY (ROBLOX OPEN CLOUD)</label>
+            <input type="password" id="setApiKey" placeholder="••••••••••••••••••••••••••"/>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="saveSettings()">💾 SIMPAN</button>
+            <button class="btn btn-ghost btn-sm" id="validateBtn" onclick="validateKey()">🔍 TEST API KEY</button>
+          </div>
+          <div id="validateResult" style="display:none;margin-top:12px;padding:10px 14px;border-radius:4px;font-family:var(--font-mono);font-size:0.75rem"></div>
+        </div>
+      </div>
+
+      <!-- UPGRADE -->
+      <div id="page-upgrade" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">🚀 UPGRADE TIER</div>
+
+        <div class="card">
+          <div class="card-title">PILIH TIER</div>
+          <div class="pricing-grid" id="pricingGrid"></div>
+        </div>
+
+        <div class="card" id="paymentFormCard" style="display:none">
+          <div class="card-title">FORM UPGRADE</div>
+          <div style="padding:12px;background:rgba(0,245,255,0.03);border:1px solid rgba(0,245,255,0.2);border-radius:4px;margin-bottom:14px;font-family:var(--font-mono);font-size:0.75rem">
+            <div style="color:var(--cyan);margin-bottom:6px;font-family:var(--font-hd);font-size:0.65rem;letter-spacing:2px">CARA PEMBAYARAN via DANA:</div>
+            <div style="color:var(--muted)">1. Bayar terlebih dahulu via DANA ke nomor admin.</div>
+            <div style="color:var(--muted)">2. Simpan screenshot bukti pembayaran.</div>
+            <div style="color:var(--muted)">3. Upload bukti DANA di form di bawah.</div>
+            <div style="color:var(--muted)">4. Tunggu konfirmasi admin dalam 24 jam.</div>
+          </div>
+          <div class="input-group">
+            <label>TIER TUJUAN</label>
+            <input type="text" id="payTierDisplay" readonly style="color:var(--cyan)"/>
+          </div>
+          <div class="input-group">
+            <label>TOTAL PEMBAYARAN</label>
+            <input type="text" id="payAmountDisplay" readonly style="color:var(--yellow)"/>
+          </div>
+          <div class="input-group">
+            <label>BUKTI TRANSFER (SS)</label>
+            <input type="file" id="payProof" accept="image/*"/>
+          </div>
+          <div class="input-group">
+            <label>CATATAN (OPSIONAL)</label>
+            <input type="text" id="payNote" placeholder="Contoh: transfer via BCA 08:30"/>
+          </div>
+          <button class="btn btn-primary" onclick="submitPayment()">📨 KIRIM REQUEST</button>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">RIWAYAT REQUEST</div>
+            <button class="btn btn-ghost btn-sm" onclick="loadMyPayments()">🔄 REFRESH</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>TIER</th><th>NOMINAL</th><th>STATUS</th><th>NOTE ADMIN</th><th>TANGGAL</th></tr></thead>
+              <tbody id="myPaymentsBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="page-admin" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--yellow);margin-bottom:20px">👑 ADMIN PANEL</div>
+
+        <div class="stats-grid" id="adminStats">
+          <div class="stat-card"><div class="stat-val" id="aStatUsers">-</div><div class="stat-label">TOTAL USER</div></div>
+          <div class="stat-card"><div class="stat-val green" id="aStatUploads">-</div><div class="stat-label">TOTAL UPLOAD</div></div>
+          <div class="stat-card"><div class="stat-val pink" id="aStatPending">-</div><div class="stat-label">PENDING PAYMENT</div></div>
+          <div class="stat-card"><div class="stat-val yellow" id="aStatToday">-</div><div class="stat-label">UPLOAD HARI INI</div></div>
+        </div>
+
+        <!-- Pending Payments -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">PAYMENT REQUESTS</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="loadAdminPayments('pending')">PENDING</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadAdminPayments('approved')">APPROVED</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadAdminPayments('rejected')">REJECTED</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>USER</th><th>TIER</th><th>NOMINAL</th><th>BUKTI</th><th>TANGGAL</th><th>ACTION</th></tr></thead>
+              <tbody id="adminPaymentsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- User management -->
+        <div class="card">
+          <div class="card-title">MANAGE USERS</div>
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <input type="text" id="userSearch" placeholder="Cari username / Discord ID..." style="flex:1;min-width:200px" oninput="loadAdminUsers()"/>
+            <select id="userTierFilter" onchange="loadAdminUsers()" style="width:140px">
+              <option value="">SEMUA TIER</option>
+              <option value="free">FREE</option>
+              <option value="bronze">BRONZE</option>
+              <option value="silver">SILVER</option>
+              <option value="gold">GOLD</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>USER</th><th>TIER</th><th>UPLOAD</th><th>JOIN</th><th>ACTION</th></tr></thead>
+              <tbody id="adminUsersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Server logs -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">SERVER LOGS</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="loadAdminLogs()">🔄 REFRESH</button>
+              <button class="btn btn-danger btn-sm" onclick="clearAdminLogs()">🗑️ HAPUS</button>
+            </div>
+          </div>
+          <div id="adminLogList" style="font-family:var(--font-mono);font-size:0.72rem;display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────
+let me = null;
+let selectedFiles = [];
+let isUploading = false;
+let creatorType = "user";
+let selectedPayTier = null;
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch("/api/me");
+    if (!res.ok) { window.location.href = "/"; return; }
+    me = await res.json();
+    document.getElementById("app").style.display = "block";
+    renderNav();
+    showPage("dashboard");
+    renderDashboard();
+    if (me.isAdmin) document.getElementById("adminNav").style.display = "block";
+    loadHistory();
+    loadMyPayments();
+    // Init slider fills
+    updateSlider("speed", document.getElementById("speedSlider").value, "×");
+    updateSlider("pitch", document.getElementById("pitchSlider").value, " st");
+  } catch {
+    window.location.href = "/";
+  }
+}
+
+function renderNav() {
+  document.getElementById("navUsername").textContent = me.username;
+  document.getElementById("navAvatar").src = me.avatar
+    ? `https://cdn.discordapp.com/avatars/${me.discord_id}/${me.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+  const badge = document.getElementById("navTierBadge");
+  badge.textContent = me.tier.toUpperCase();
+  badge.className = `tier-badge tier-${me.tier}`;
+}
+
+function animateCounter(el, target, suffix = "") {
+  if (target === "∞" || target === 999999) { el.textContent = "∞"; return; }
+  const duration = 800, start = 0, increment = target / (duration / 16);
+  let current = start;
+  const timer = setInterval(() => {
+    current = Math.min(current + increment, target);
+    el.textContent = Math.floor(current) + suffix;
+    if (current >= target) clearInterval(timer);
+  }, 16);
+}
+
+function renderDashboard() {
+  // Welcome
+  const greet = document.getElementById("welcomeName");
+  const sub = document.getElementById("welcomeSub");
+  if (greet) greet.textContent = me.username;
+  if (sub) {
+    const tierColors = {free:"#888",bronze:"#cd7f32",silver:"#c0c0c0",gold:"#ffd700"};
+    sub.innerHTML = `Tier: <span style="color:${tierColors[me.tier]};font-weight:700">${me.tier.toUpperCase()}</span> — ${me.isUnlimited ? "Kuota unlimited bulan ini 🔥" : `${me.remaining} upload tersisa bulan ini`}`;
+  }
+
+  // Animated counters
+  const usedEl = document.getElementById("statUsed");
+  const remEl = document.getElementById("statRemaining");
+  const limEl = document.getElementById("statLimit");
+  if (usedEl) animateCounter(usedEl, me.uploads_used);
+  if (remEl) animateCounter(remEl, me.isUnlimited ? "∞" : me.remaining);
+  if (limEl) animateCounter(limEl, me.isUnlimited ? "∞" : me.tierInfo.limit);
+
+  // Quota bar
+  const pct = me.isUnlimited ? 15 : Math.min((me.uploads_used / me.tierInfo.limit) * 100, 100);
+  const fill = document.getElementById("quotaFill");
+  if (fill) {
+    setTimeout(() => { fill.style.width = pct + "%"; }, 200);
+    if (pct > 80) fill.classList.add("danger");
+  }
+  const qt = document.getElementById("quotaText");
+  const rt = document.getElementById("resetText");
+  const qm = document.getElementById("quotaMax");
+  if (qt) qt.textContent = me.isUnlimited ? `${me.uploads_used} / ∞` : `${me.uploads_used} / ${me.tierInfo.limit}`;
+  if (rt) rt.textContent = `Reset: ${me.reset_date}`;
+  if (qm) qm.textContent = me.isUnlimited ? "∞" : me.tierInfo.limit;
+
+  // Tier badge
+  const tierColors = {free:"#888",bronze:"#cd7f32",silver:"#c0c0c0",gold:"#ffd700"};
+  const tierIcons = {free:"🎮",bronze:"🥉",silver:"🥈",gold:"🏆"};
+  const tierDesc = {free:"50 upload/bulan",bronze:"200 upload/bulan",silver:"500 upload/bulan",gold:"Unlimited upload"};
+  const db = document.getElementById("dashTierBadge");
+  const di = document.getElementById("dashTierIcon");
+  const dd = document.getElementById("dashTierDesc");
+  if (db) { db.textContent = me.tier.toUpperCase(); db.style.color = tierColors[me.tier] || "#888"; }
+  if (di) di.textContent = tierIcons[me.tier] || "🎮";
+  if (dd) dd.textContent = tierDesc[me.tier] || "";
+
+  // Upload page API key warning
+  if (me.roblox_api_key) {
+    document.getElementById("noApiKeyWarn").style.display = "none";
+    document.getElementById("apiKeyOk").style.display = "block";
+  } else {
+    document.getElementById("noApiKeyWarn").style.display = "block";
+    document.getElementById("apiKeyOk").style.display = "none";
+  }
+
+  // Settings pre-fill
+  if (me.roblox_user_id) document.getElementById("setUserId").value = me.roblox_user_id;
+  if (me.roblox_group_id) document.getElementById("setGroupId").value = me.roblox_group_id;
+  if (me.creator_type) setCreatorType(me.creator_type);
+
+  renderPricing();
+}
+
+// ── Pages ─────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById(`page-${name}`).classList.add("active");
+  document.querySelector(`[data-page="${name}"]`)?.classList.add("active");
+  if (name === "admin") { loadAdminStats(); loadAdminPayments("pending"); loadAdminUsers(); loadAdminLogs(); }
+  if (name === "history") loadHistory();
+}
+
+// ── Settings ──────────────────────────────────────────────────
+function setCreatorType(type) {
+  creatorType = type;
+  document.getElementById("toggleUser").classList.toggle("active", type === "user");
+  document.getElementById("toggleGroup").classList.toggle("active", type === "group");
+  document.getElementById("groupIdWrap").style.display = type === "group" ? "block" : "none";
+}
+
+async function saveSettings() {
+  const body = {
+    roblox_user_id: document.getElementById("setUserId").value.trim(),
+    roblox_group_id: document.getElementById("setGroupId").value.trim(),
+    roblox_api_key: document.getElementById("setApiKey").value.trim(),
+    creator_type: creatorType,
+  };
+  if (!body.roblox_api_key) delete body.roblox_api_key;
+  const res = await fetch("/api/settings", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+  if (res.ok) { toast("✅ Settings disimpan!"); me = await (await fetch("/api/me")).json(); renderDashboard(); }
+  else toast("❌ Gagal simpan settings");
+}
+
+async function validateKey() {
+  const btn = document.getElementById("validateBtn");
+  const resultEl = document.getElementById("validateResult");
+  btn.disabled = true; btn.textContent = "⏳ MENGECEK...";
+  resultEl.style.display = "none";
+  const res = await fetch("/api/validate-key", { method: "POST" });
+  const data = await res.json();
+  resultEl.style.display = "block";
+  if (data.valid) {
+    resultEl.style.background = "rgba(0,255,159,0.05)";
+    resultEl.style.border = "1px solid rgba(0,255,159,0.3)";
+    resultEl.style.color = "var(--green)";
+    resultEl.innerHTML = `✅ API KEY VALID — ${data.name}`;
+  } else {
+    resultEl.style.background = "rgba(255,45,120,0.05)";
+    resultEl.style.border = "1px solid rgba(255,45,120,0.3)";
+    resultEl.style.color = "var(--pink)";
+    resultEl.innerHTML = `❌ API KEY INVALID — ${typeof data.error === "object" ? JSON.stringify(data.error) : data.error}`;
+  }
+  btn.disabled = false; btn.textContent = "🔍 TEST API KEY";
+}
+
+// ── File handling ──────────────────────────────────────────────
+function formatSize(b) { if(b<1024)return b+"B"; if(b<1048576)return(b/1024).toFixed(0)+"KB"; return(b/1048576).toFixed(1)+"MB"; }
+
+function handleFiles(files) {
+  const valid = Array.from(files).filter(f => f.type.startsWith("audio/") || /\.(mp3|wav|ogg|flac|aac|m4a)$/i.test(f.name));
+  if (!valid.length) return toast("⚠️ Tidak ada file audio valid");
+  const existing = selectedFiles.map(f => f.name);
+  const newFiles = valid.filter(f => !existing.includes(f.name));
+  if (valid.length - newFiles.length > 0) toast(`ℹ️ ${valid.length - newFiles.length} duplikat diabaikan`);
+  selectedFiles = [...selectedFiles, ...newFiles];
+  renderFileList(); updateBtn();
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById("dropzone").classList.remove("drag");
+  handleFiles(e.dataTransfer.files);
+}
+
+function clearFileList() {
+  if (isUploading) return toast("⚠️ Upload sedang berjalan");
+  selectedFiles = [];
+  renderFileList(); updateBtn();
+  document.getElementById("fileInput").value = "";
+}
+
+function removeFile(i) {
+  if (isUploading) return;
+  selectedFiles.splice(i, 1);
+  renderFileList(); updateBtn();
+}
+
+function renderFileList() {
+  const wrap = document.getElementById("fileListWrap");
+  const container = document.getElementById("fileListItems");
+  const summary = document.getElementById("fileListSummary");
+  if (!selectedFiles.length) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  const total = selectedFiles.reduce((a, f) => a + f.size, 0);
+  summary.textContent = `${selectedFiles.length} FILE — ${formatSize(total)} TOTAL`;
+  container.innerHTML = selectedFiles.map((f, i) => `
+    <div class="file-item pending" id="fitem_${i}">
+      <span>🎵</span>
+      <div style="flex:1;min-width:0">
+        <div class="file-item-name">${f.name}</div>
+        <div id="fitem_aid_${i}" class="file-item-assetid" style="display:none"></div>
+      </div>
+      <span class="file-item-size">${formatSize(f.size)}</span>
+      <span id="fitem_st_${i}" style="font-family:var(--font-mono);font-size:0.7rem;flex-shrink:0">—</span>
+      ${!isUploading ? `<span onclick="removeFile(${i})" style="cursor:pointer;color:var(--muted);flex-shrink:0">✕</span>` : ""}
+    </div>`).join("");
+}
+
+function updateFileItemStatus(i, status, assetId, error) {
+  const item = document.getElementById(`fitem_${i}`);
+  const st = document.getElementById(`fitem_st_${i}`);
+  const aid = document.getElementById(`fitem_aid_${i}`);
+  if (!item) return;
+  item.className = `file-item ${status}`;
+  if (status === "uploading") { st.textContent = "⏳"; st.style.color = "var(--cyan)"; }
+  else if (status === "success") {
+    st.textContent = "✅"; st.style.color = "var(--green)";
+    if (assetId) { aid.style.display = "block"; aid.textContent = `ID: ${assetId}`; aid.onclick = () => copyText(assetId, aid); }
+  } else if (status === "failed") {
+    st.textContent = "❌"; st.style.color = "var(--pink)";
+    if (error) { aid.style.display = "block"; aid.style.color = "var(--pink)"; aid.textContent = error.slice(0, 60); }
+  }
+}
+
+function updateBtn() {
+  document.getElementById("uploadBtn").disabled = !selectedFiles.length || isUploading || !me?.roblox_api_key;
+}
+
+// ── Upload ─────────────────────────────────────────────────────
+async function startUpload() {
+  if (!selectedFiles.length || isUploading) return;
+  if (!me?.roblox_api_key) return toast("⚠️ Simpan API Key dulu di Settings");
+  isUploading = true; updateBtn(); renderFileList();
+
+  const formData = new FormData();
+  selectedFiles.forEach(f => formData.append("files", f));
+  formData.append("speed", document.getElementById("speedSlider").value);
+  formData.append("pitch", document.getElementById("pitchSlider").value);
+  formData.append("normalize", document.getElementById("normalizeToggle").checked);
+
+  const bar = document.getElementById("progressFill");
+  const text = document.getElementById("progressText");
+  const logList = document.getElementById("logList");
+  const logCard = document.getElementById("uploadLogCard");
+  logList.innerHTML = ""; logCard.style.display = "block";
+  bar.style.width = "0%"; text.textContent = "Memulai upload...";
+
+  try {
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith("data:")) continue;
+        try {
+          const evt = JSON.parse(line.slice(5));
+
+          if (evt.type === "warn") toast("⚠️ " + evt.msg);
+
+          if (evt.type === "progress") {
+            const pct = ((evt.index - 1) / evt.total * 100).toFixed(0);
+            bar.style.width = pct + "%";
+            const lbl = { ffmpeg: "🔄 FFmpeg...", uploading: "📤 Uploading..." }[evt.status] || "⚙️";
+            text.textContent = `${evt.index} / ${evt.total} — ${lbl}`;
+            updateFileItemStatus(evt.index - 1, "uploading");
+
+            let item = document.getElementById(`log_${evt.index}`);
+            if (!item) { item = document.createElement("li"); item.id = `log_${evt.index}`; item.className = "log-item processing"; logList.appendChild(item); }
+            item.innerHTML = `<span>⏳</span><div><div class="log-name">${evt.file}</div><div class="log-detail">${lbl}</div></div>`;
+          }
+
+          if (evt.type === "result") {
+            const pct = Math.min((evt.index / evt.total * 100), 99).toFixed(0);
+            bar.style.width = pct + "%";
+            if (evt.status === "SUCCESS") updateFileItemStatus(evt.index - 1, "success", evt.assetId);
+            else updateFileItemStatus(evt.index - 1, "failed", null, evt.error);
+
+            let item = document.getElementById(`log_${evt.index}`);
+            if (!item) { item = document.createElement("li"); item.id = `log_${evt.index}`; logList.appendChild(item); }
+            if (evt.status === "SUCCESS") {
+              item.className = "log-item success";
+              item.innerHTML = `<span>✅</span><div><div class="log-name">${evt.file}</div><div class="log-detail">ASSET ID: <span class="asset-id" onclick="copyText('${evt.assetId}',this)">${evt.assetId}</span></div></div>`;
+            } else {
+              item.className = "log-item failed";
+              item.innerHTML = `<span>❌</span><div><div class="log-name">${evt.file}</div><div class="log-detail" style="color:var(--pink)">${evt.error || "Gagal"}</div></div>`;
+            }
+          }
+
+          if (evt.type === "done") {
+            bar.style.width = "100%";
+            text.textContent = `✅ SELESAI — ${evt.success}/${evt.total} berhasil`;
+            toast(`🎉 ${evt.success}/${evt.total} BERHASIL!`);
+            me = await (await fetch("/api/me")).json();
+            renderDashboard();
+          }
+        } catch {}
+      }
+    }
+  } catch (e) { toast("❌ Error: " + e.message); }
+  finally { isUploading = false; updateBtn(); renderFileList(); }
+}
+
+// ── Sliders ───────────────────────────────────────────────────
+function updateSlider(type, val, unit) {
+  document.getElementById(`${type}Val`).textContent = parseFloat(val).toFixed(type === "speed" ? 2 : 0) + unit;
+  const el = document.getElementById(`${type}Slider`);
+  const min = parseFloat(el.min), max = parseFloat(el.max), v = parseFloat(val);
+  const pct = ((v - min) / (max - min) * 100).toFixed(1) + "%";
+  el.style.setProperty("--val", pct);
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById("sidebar");
+  const btn = document.getElementById("hamburgerBtn");
+  const overlay = document.getElementById("sidebarOverlay");
+  sb.classList.toggle("open");
+  btn.classList.toggle("open");
+  overlay.classList.toggle("visible");
+}
+
+function closeSidebar() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("hamburgerBtn").classList.remove("open");
+  document.getElementById("sidebarOverlay").classList.remove("visible");
+}
+
+// ── History ───────────────────────────────────────────────────
+async function loadHistory() {
+  const res = await fetch("/api/history");
+  const rows = await res.json();
+  const tbody = document.getElementById("historyBody");
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Belum ada history</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.filename}</td>
+      <td>${r.asset_id ? `<span class="asset-id" onclick="copyText('${r.asset_id}',this)">${r.asset_id}</span>` : "—"}</td>
+      <td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td>
+      <td style="color:var(--muted)">${r.created_at?.slice(0,16) || "—"}</td>
+    </tr>`).join("");
+}
+
+// ── Pricing & Payment ─────────────────────────────────────────
+const TIER_DATA = {
+  free:   { name: "FREE",   limit: "50/bulan",  price: "GRATIS",         color: "#888",    priceNum: 0 },
+  bronze: { name: "BRONZE", limit: "200/bulan", price: "Rp 50.000",      color: "#cd7f32", priceNum: 50000 },
+  silver: { name: "SILVER", limit: "500/bulan", price: "Rp 100.000",     color: "#c0c0c0", priceNum: 100000 },
+  gold:   { name: "GOLD",   limit: "UNLIMITED", price: "Rp 180.000",     color: "#ffd700", priceNum: 180000 },
+};
+
+function renderPricing() {
+  const grid = document.getElementById("pricingGrid");
+  grid.innerHTML = Object.entries(TIER_DATA).map(([key, t]) => `
+    <div class="price-card ${me?.tier === key ? "current" : ""}" onclick="selectTier('${key}')" style="border-color:${me?.tier === key ? t.color : ""}">
+      <div class="price-name" style="color:${t.color}">${t.name}</div>
+      <div class="price-limit">${t.limit}</div>
+      <div class="price-amount" style="color:${t.color}">${t.price}</div>
+      ${key !== "free" && me?.tier !== key ? `<button class="btn btn-ghost btn-sm" style="width:100%;border-color:${t.color};color:${t.color}">PILIH</button>` : ""}
+    </div>`).join("");
+}
+
+function selectTier(tier) {
+  if (tier === "free" || tier === me?.tier) return;
+  selectedPayTier = tier;
+  const t = TIER_DATA[tier];
+  document.getElementById("payTierDisplay").value = t.name;
+  document.getElementById("payAmountDisplay").value = t.price;
+  document.getElementById("paymentFormCard").style.display = "block";
+  document.getElementById("paymentFormCard").scrollIntoView({ behavior: "smooth" });
+}
+
+async function submitPayment() {
+  if (!selectedPayTier) return toast("⚠️ Pilih tier dulu");
+  const proof = document.getElementById("payProof").files[0];
+  const note = document.getElementById("payNote").value;
+  const form = new FormData();
+  form.append("target_tier", selectedPayTier);
+  form.append("note", note);
+  if (proof) form.append("proof", proof);
+
+  const res = await fetch("/api/payment/request", { method: "POST", body: form });
+  const data = await res.json();
+  if (res.ok) { toast("✅ Request terkirim! Tunggu konfirmasi admin"); loadMyPayments(); document.getElementById("paymentFormCard").style.display = "none"; }
+  else toast("❌ " + data.error);
+}
+
+async function loadMyPayments() {
+  const res = await fetch("/api/payment/my-requests");
+  const rows = await res.json();
+  const tbody = document.getElementById("myPaymentsBody");
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Belum ada request</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><span class="tier-badge tier-${r.target_tier}">${r.target_tier.toUpperCase()}</span></td>
+      <td style="color:var(--yellow)">Rp ${r.amount.toLocaleString()}</td>
+      <td><span class="badge badge-${r.status}">${r.status.toUpperCase()}</span></td>
+      <td style="color:var(--muted);font-size:0.65rem">${r.note || "—"}</td>
+      <td style="color:var(--muted)">${r.created_at?.slice(0,16) || "—"}</td>
+    </tr>`).join("");
+}
+
+// ── Admin ─────────────────────────────────────────────────────
+async function loadAdminStats() {
+  const d = await (await fetch("/api/admin/stats")).json();
+  document.getElementById("aStatUsers").textContent = d.totalUsers;
+  document.getElementById("aStatUploads").textContent = d.totalUploads;
+  document.getElementById("aStatPending").textContent = d.pendingPayments;
+  document.getElementById("aStatToday").textContent = d.todayUploads;
+}
+
+async function loadAdminPayments(status = "pending") {
+  const rows = await (await fetch(`/api/admin/payments?status=${status}`)).json();
+  const tbody = document.getElementById("adminPaymentsBody");
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Tidak ada data</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <img src="${r.avatar ? `https://cdn.discordapp.com/avatars/${r.discord_id}/${r.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/0.png"}" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border)"/>
+          <span>${r.username}</span>
+        </div>
+      </td>
+      <td><span class="tier-badge tier-${r.target_tier}">${r.target_tier.toUpperCase()}</span></td>
+      <td style="color:var(--yellow)">Rp ${r.amount.toLocaleString()}</td>
+      <td>${r.proof_url ? `<a href="${r.proof_url}" target="_blank" style="color:var(--cyan);font-size:0.7rem">LIHAT SS</a>` : "—"}</td>
+      <td style="color:var(--muted)">${r.created_at?.slice(0,16) || "—"}</td>
+      <td>
+        ${r.status === "pending" ? `
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-success btn-sm" onclick="reviewPayment(${r.id},'approve')">✅</button>
+            <button class="btn btn-danger btn-sm" onclick="reviewPayment(${r.id},'reject')">❌</button>
+          </div>` : `<span class="badge badge-${r.status}">${r.status.toUpperCase()}</span>`}
+      </td>
+    </tr>`).join("");
+}
+
+async function reviewPayment(id, action) {
+  const note = action === "reject" ? prompt("Alasan reject (opsional):") : null;
+  const res = await fetch(`/api/admin/payments/${id}`, {
+    method: "PATCH", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ action, note })
+  });
+  if (res.ok) { toast(`✅ Payment ${action === "approve" ? "APPROVED" : "REJECTED"}`); loadAdminPayments("pending"); loadAdminStats(); }
+  else toast("❌ Gagal");
+}
+
+async function loadAdminUsers() {
+  const search = document.getElementById("userSearch").value;
+  const tier = document.getElementById("userTierFilter").value;
+  const rows = await (await fetch(`/api/admin/users?search=${encodeURIComponent(search)}&tier=${tier}`)).json();
+  const tbody = document.getElementById("adminUsersBody");
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Tidak ada user</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <img src="${r.avatar ? `https://cdn.discordapp.com/avatars/${r.discord_id}/${r.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/0.png"}" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border)"/>
+          <div>
+            <div>${r.username}</div>
+            <div style="font-size:0.6rem;color:var(--muted)">${r.discord_id}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <select onchange="setUserTier(${r.id}, this.value)" style="width:90px;padding:4px 6px;font-size:0.65rem">
+          ${["free","bronze","silver","gold"].map(t => `<option value="${t}" ${r.tier===t?"selected":""}>${t.toUpperCase()}</option>`).join("")}
+        </select>
+      </td>
+      <td style="font-family:var(--font-mono)">${r.uploads_used}</td>
+      <td style="color:var(--muted)">${r.created_at?.slice(0,10) || "—"}</td>
+      <td>
+        <button class="btn ${r.banned ? "btn-success" : "btn-danger"} btn-sm" onclick="toggleBan(${r.id}, ${r.banned})">
+          ${r.banned ? "UNBAN" : "BAN"}
+        </button>
+      </td>
+    </tr>`).join("");
+}
+
+async function setUserTier(id, tier) {
+  const res = await fetch(`/api/admin/users/${id}`, {
+    method: "PATCH", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ tier })
+  });
+  if (res.ok) toast(`✅ Tier diubah ke ${tier.toUpperCase()}`);
+  else toast("❌ Gagal ubah tier");
+}
+
+async function toggleBan(id, currentBanned) {
+  const reason = currentBanned ? null : prompt("Alasan ban:");
+  if (!currentBanned && reason === null) return;
+  const res = await fetch(`/api/admin/users/${id}`, {
+    method: "PATCH", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ banned: !currentBanned, ban_reason: reason })
+  });
+  if (res.ok) { toast(currentBanned ? "✅ User di-unban" : "⚠️ User di-ban"); loadAdminUsers(); }
+}
+
+async function loadAdminLogs() {
+  const rows = await (await fetch("/api/admin/logs?limit=100")).json();
+  const container = document.getElementById("adminLogList");
+  const colors = { success: "var(--green)", error: "var(--pink)", warn: "var(--yellow)", info: "var(--muted)" };
+  if (!rows.length) { container.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px">Belum ada log</div>`; return; }
+  container.innerHTML = rows.map(l => {
+    const time = l.created_at?.slice(11,19) || "";
+    const c = colors[l.type] || "var(--muted)";
+    return `<div style="padding:5px 8px;border-radius:3px;background:rgba(255,255,255,0.02);border-left:3px solid ${c}">
+      <span style="color:var(--muted);margin-right:8px">${time}</span>
+      <span style="color:${c}">${l.msg}</span>
+    </div>`;
+  }).join("");
+}
+
+async function clearAdminLogs() {
+  await fetch("/api/admin/logs", { method: "DELETE" });
+  loadAdminLogs(); toast("🗑️ Logs dihapus");
+}
+
+// ── Utils ─────────────────────────────────────────────────────
+function copyText(text, el) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = el.textContent;
+    el.textContent = "✅ COPIED!";
+    setTimeout(() => el.textContent = orig, 1500);
+  });
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+
+init();
+</script>
+</body>
+</html>
