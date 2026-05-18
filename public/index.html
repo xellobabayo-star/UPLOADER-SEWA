@@ -1,0 +1,1467 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PENDOSA BYPASS AUDIO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #050810;
+  --bg2:      #080d1a;
+  --bg3:      #0d1426;
+  --cyan:     #00f5ff;
+  --pink:     #ff2d78;
+  --yellow:   #ffe600;
+  --green:    #00ff9f;
+  --purple:   #a855f7;
+  --text:     #e2e8f0;
+  --muted:    #4a5568;
+  --border:   rgba(0,245,255,0.15);
+  --glow-c:   rgba(0,245,255,0.4);
+  --glow-p:   rgba(255,45,120,0.4);
+  --font-hd:  'Orbitron', monospace;
+  --font-mono:'Share Tech Mono', monospace;
+  --font-body:'Rajdhani', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:16px;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* ── Scanline overlay ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);
+  pointer-events:none;z-index:9999;
+}
+
+/* ── Noise texture ── */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:0.4;pointer-events:none;z-index:9998;
+}
+
+/* ── Grid bg ── */
+.grid-bg{
+  position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(0,245,255,0.03) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,245,255,0.03) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── Layout ── */
+#app{position:relative;z-index:1;min-height:100vh;}
+
+/* ── Navbar ── */
+nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 24px;
+  border-bottom:1px solid var(--border);
+  background:rgba(5,8,16,0.9);
+  backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:100;
+}
+.logo{
+  font-family:var(--font-hd);
+  font-weight:900;font-size:1.1rem;
+  letter-spacing:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  text-shadow:none;
+}
+.logo span{
+  font-size:0.6rem;display:block;
+  color:var(--muted);-webkit-text-fill-color:var(--muted);
+  letter-spacing:4px;
+  font-family:var(--font-mono);
+}
+.nav-right{display:flex;align-items:center;gap:12px}
+.avatar{width:34px;height:34px;border-radius:50%;border:2px solid var(--cyan);object-fit:cover}
+.nav-username{font-family:var(--font-mono);font-size:0.8rem;color:var(--cyan)}
+.tier-badge{
+  font-family:var(--font-hd);font-size:0.55rem;font-weight:700;
+  padding:3px 8px;border-radius:3px;letter-spacing:1px;
+}
+.tier-free  {background:rgba(100,100,100,0.2);color:#888;border:1px solid #444}
+.tier-bronze{background:rgba(205,127,50,0.15);color:#cd7f32;border:1px solid rgba(205,127,50,0.4)}
+.tier-silver{background:rgba(192,192,192,0.15);color:#c0c0c0;border:1px solid rgba(192,192,192,0.4)}
+.tier-gold  {background:rgba(255,215,0,0.15);color:#ffd700;border:1px solid rgba(255,215,0,0.4)}
+
+/* ── Sidebar + content ── */
+.layout{display:flex;min-height:calc(100vh - 65px)}
+aside{
+  width:220px;flex-shrink:0;
+  border-right:1px solid var(--border);
+  padding:20px 0;
+  background:rgba(8,13,26,0.6);
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 20px;
+  font-family:var(--font-mono);font-size:0.78rem;
+  color:var(--muted);cursor:pointer;
+  border-left:3px solid transparent;
+  transition:all 0.2s;letter-spacing:1px;
+}
+.nav-item:hover{color:var(--cyan);background:rgba(0,245,255,0.05);border-left-color:var(--cyan)}
+.nav-item.active{color:var(--cyan);background:rgba(0,245,255,0.08);border-left-color:var(--cyan)}
+.nav-item .icon{font-size:1rem;width:20px;text-align:center}
+.nav-section{
+  font-family:var(--font-hd);font-size:0.5rem;font-weight:700;
+  color:var(--muted);letter-spacing:3px;
+  padding:16px 20px 6px;
+}
+.nav-divider{height:1px;background:var(--border);margin:8px 16px}
+
+main{flex:1;padding:28px;overflow-y:auto}
+
+/* ── Pages ── */
+.page{display:none}
+.page.active{display:block}
+
+/* ── Cards ── */
+.card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:6px;
+  padding:20px;
+  margin-bottom:20px;
+  position:relative;
+  overflow:hidden;
+}
+.card::before{
+  content:'';position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+  opacity:0.5;
+}
+.card-title{
+  font-family:var(--font-hd);font-size:0.75rem;font-weight:700;
+  color:var(--cyan);letter-spacing:2px;
+  margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.card-title::before{content:'▸';color:var(--pink)}
+
+/* ── Stats grid ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.stat-card{
+  background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+  padding:16px;text-align:center;position:relative;overflow:hidden;
+}
+.stat-card::after{
+  content:'';position:absolute;
+  bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));
+}
+.stat-val{font-family:var(--font-hd);font-size:1.8rem;font-weight:900;color:var(--cyan)}
+.stat-val.pink{color:var(--pink)}
+.stat-val.yellow{color:var(--yellow)}
+.stat-val.green{color:var(--green)}
+.stat-label{font-family:var(--font-mono);font-size:0.65rem;color:var(--muted);letter-spacing:2px;margin-top:4px}
+
+/* ── Progress bar ── */
+.quota-bar{background:rgba(255,255,255,0.05);border-radius:2px;height:6px;overflow:hidden;margin:8px 0}
+.quota-fill{height:100%;border-radius:2px;transition:width 0.5s ease;background:linear-gradient(90deg,var(--cyan),var(--pink))}
+.quota-fill.danger{background:linear-gradient(90deg,var(--yellow),var(--pink))}
+
+/* ── Buttons ── */
+.btn{
+  font-family:var(--font-hd);font-size:0.65rem;font-weight:700;
+  letter-spacing:1.5px;padding:10px 18px;border-radius:3px;
+  border:none;cursor:pointer;transition:all 0.2s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--cyan),#0099aa);
+  color:#000;
+  box-shadow:0 0 20px rgba(0,245,255,0.3);
+}
+.btn-primary:hover{box-shadow:0 0 30px rgba(0,245,255,0.5);transform:translateY(-1px)}
+.btn-primary:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-pink{
+  background:linear-gradient(135deg,var(--pink),#aa0055);
+  color:#fff;
+  box-shadow:0 0 20px var(--glow-p);
+}
+.btn-pink:hover{box-shadow:0 0 30px var(--glow-p);transform:translateY(-1px)}
+.btn-ghost{
+  background:transparent;color:var(--cyan);
+  border:1px solid var(--border);
+}
+.btn-ghost:hover{border-color:var(--cyan);background:rgba(0,245,255,0.05)}
+.btn-sm{padding:6px 12px;font-size:0.6rem}
+.btn-danger{background:rgba(255,45,120,0.15);color:var(--pink);border:1px solid rgba(255,45,120,0.3)}
+.btn-danger:hover{background:rgba(255,45,120,0.25)}
+.btn-success{background:rgba(0,255,159,0.15);color:var(--green);border:1px solid rgba(0,255,159,0.3)}
+.btn-success:hover{background:rgba(0,255,159,0.25)}
+
+/* ── Inputs ── */
+label{
+  display:block;font-family:var(--font-mono);font-size:0.65rem;
+  color:var(--muted);letter-spacing:2px;margin-bottom:5px;
+}
+input,select,textarea{
+  width:100%;background:var(--bg3);
+  border:1px solid var(--border);border-radius:4px;
+  color:var(--text);font-family:var(--font-mono);font-size:0.82rem;
+  padding:10px 12px;outline:none;transition:border-color 0.2s;
+}
+input:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 10px rgba(0,245,255,0.1)}
+select option{background:var(--bg3)}
+.input-group{margin-bottom:14px}
+.row{display:flex;gap:12px}
+.row .input-group{flex:1}
+
+/* ── Toggle ── */
+.toggle-group{display:flex;background:var(--bg3);border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:14px}
+.toggle-btn{
+  flex:1;padding:9px;font-family:var(--font-hd);font-size:0.6rem;
+  letter-spacing:1px;border:none;background:transparent;
+  color:var(--muted);cursor:pointer;transition:all 0.2s;
+}
+.toggle-btn.active{background:rgba(0,245,255,0.1);color:var(--cyan)}
+
+/* ── Dropzone ── */
+.dropzone{
+  border:2px dashed var(--muted);border-radius:6px;
+  padding:40px 20px;text-align:center;cursor:pointer;
+  transition:all 0.2s;background:var(--bg3);margin-bottom:14px;
+}
+.dropzone:hover,.dropzone.drag{
+  border-color:var(--cyan);
+  background:rgba(0,245,255,0.03);
+  box-shadow:0 0 20px rgba(0,245,255,0.1) inset;
+}
+.dropzone .dz-icon{font-size:2.5rem;margin-bottom:10px;display:block}
+.dropzone .dz-text{font-family:var(--font-mono);font-size:0.8rem;color:var(--muted)}
+.dropzone .dz-sub{font-size:0.65rem;margin-top:4px;color:var(--muted);opacity:0.6}
+
+/* ── File list ── */
+.file-item{
+  display:flex;align-items:center;gap:8px;padding:7px 10px;
+  border-radius:4px;background:rgba(255,255,255,0.02);
+  border:1px solid rgba(255,255,255,0.05);font-size:0.78rem;
+  transition:all 0.2s;
+}
+.file-item.uploading{border-color:rgba(0,245,255,0.3);background:rgba(0,245,255,0.03)}
+.file-item.success{border-color:rgba(0,255,159,0.3);background:rgba(0,255,159,0.03)}
+.file-item.failed{border-color:rgba(255,45,120,0.3);background:rgba(255,45,120,0.03)}
+.file-item-name{flex:1;font-family:var(--font-mono);font-size:0.72rem;word-break:break-all}
+.file-item-size{font-size:0.65rem;color:var(--muted);flex-shrink:0}
+.file-item-assetid{
+  font-size:0.65rem;color:var(--cyan);cursor:pointer;
+  font-family:var(--font-mono);margin-top:2px;
+}
+.file-item-assetid:hover{text-decoration:underline}
+
+/* ── Progress ── */
+.progress-wrap{margin:14px 0}
+.progress-bar{background:rgba(255,255,255,0.05);border-radius:2px;height:4px;overflow:hidden}
+.progress-fill{
+  height:100%;border-radius:2px;
+  background:linear-gradient(90deg,var(--cyan),var(--pink));
+  transition:width 0.4s ease;width:0%;
+  box-shadow:0 0 10px var(--cyan);
+}
+.progress-text{font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);margin-top:6px}
+
+/* ── Upload log ── */
+.log-list{list-style:none;display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto}
+.log-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:8px 12px;border-radius:4px;
+  background:rgba(255,255,255,0.02);
+  border-left:3px solid var(--muted);
+  font-family:var(--font-mono);font-size:0.72rem;
+}
+.log-item.success{border-left-color:var(--green)}
+.log-item.failed{border-left-color:var(--pink)}
+.log-item.processing{border-left-color:var(--cyan)}
+.log-name{color:var(--text)}
+.log-detail{color:var(--muted);font-size:0.65rem;margin-top:2px}
+.asset-id{color:var(--cyan);cursor:pointer}
+.asset-id:hover{text-decoration:underline}
+
+/* ── Tables ── */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:0.75rem}
+th{
+  text-align:left;padding:10px 12px;
+  font-family:var(--font-hd);font-size:0.55rem;font-weight:700;
+  color:var(--muted);letter-spacing:2px;
+  border-bottom:1px solid var(--border);
+}
+td{padding:10px 12px;border-bottom:1px solid rgba(255,255,255,0.03);vertical-align:middle}
+tr:hover td{background:rgba(0,245,255,0.02)}
+
+/* ── Status badges ── */
+.badge{
+  display:inline-block;padding:2px 8px;border-radius:3px;
+  font-family:var(--font-hd);font-size:0.5rem;font-weight:700;letter-spacing:1px;
+}
+.badge-pending{background:rgba(255,230,0,0.1);color:var(--yellow);border:1px solid rgba(255,230,0,0.3)}
+.badge-approved,.badge-success{background:rgba(0,255,159,0.1);color:var(--green);border:1px solid rgba(0,255,159,0.3)}
+.badge-rejected,.badge-failed{background:rgba(255,45,120,0.1);color:var(--pink);border:1px solid rgba(255,45,120,0.3)}
+
+/* ── Range slider ── */
+.slider-wrap{margin-bottom:14px}
+.slider-label{display:flex;justify-content:space-between;margin-bottom:6px}
+.slider-val{font-family:var(--font-hd);font-size:0.7rem;color:var(--cyan)}
+input[type=range]{
+  -webkit-appearance:none;height:4px;padding:0;
+  background:linear-gradient(90deg,var(--cyan) 0%,var(--cyan) var(--val,50%),rgba(255,255,255,0.1) var(--val,50%));
+  border:none;border-radius:2px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;
+  border-radius:50%;background:var(--cyan);cursor:pointer;
+  box-shadow:0 0 8px var(--cyan);
+}
+
+/* ── Toggle switch ── */
+.switch-wrap{display:flex;align-items:center;justify-content:space-between;padding:10px 0}
+.switch{position:relative;width:40px;height:20px;flex-shrink:0}
+.switch input{opacity:0;width:0;height:0}
+.switch-slider{
+  position:absolute;inset:0;cursor:pointer;
+  background:rgba(255,255,255,0.1);border-radius:20px;
+  transition:0.3s;border:1px solid var(--border);
+}
+.switch-slider::before{
+  content:'';position:absolute;
+  width:14px;height:14px;left:2px;bottom:2px;
+  background:var(--muted);border-radius:50%;transition:0.3s;
+}
+input:checked+.switch-slider{background:rgba(0,245,255,0.2);border-color:var(--cyan)}
+input:checked+.switch-slider::before{transform:translateX(20px);background:var(--cyan)}
+.switch-label{font-family:var(--font-mono);font-size:0.75rem;color:var(--text)}
+
+/* ── Toast ── */
+#toast{
+  position:fixed;bottom:24px;right:24px;z-index:9999;
+  font-family:var(--font-mono);font-size:0.78rem;
+  padding:12px 18px;border-radius:4px;
+  background:var(--bg2);border:1px solid var(--cyan);
+  color:var(--cyan);
+  opacity:0;transform:translateY(10px);
+  transition:all 0.3s;pointer-events:none;
+  box-shadow:0 0 20px rgba(0,245,255,0.2);
+}
+#toast.show{opacity:1;transform:translateY(0)}
+
+/* ── Login screen ── */
+#loginScreen{
+  position:fixed;inset:0;
+  background:linear-gradient(135deg, #0a0e1a 0%, #0f1426 50%, #0a1220 100%);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px;
+  overflow:auto;
+  z-index:1000;
+}
+#loginScreen::before{
+  content:'';position:fixed;inset:0;background:radial-gradient(circle at 20% 50%, rgba(0,255,159,0.06) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(79,70,229,0.06) 0%, transparent 50%);
+  pointer-events:none;z-index:0;
+}
+.login-screen{
+  display:grid;grid-template-columns:1.8fr 1fr;
+  gap:28px;max-width:1280px;width:100%;align-items:center;position:relative;z-index:1;
+}
+.landing-panel{
+  display:flex;flex-direction:column;
+  gap:28px;padding:0;position:relative;
+}
+.landing-panel::before{
+  content:'';position:absolute;top:-120px;left:-120px;width:300px;height:300px;background:radial-gradient(circle, rgba(0,255,159,0.15) 0%, transparent 70%);border-radius:50%;filter:blur(40px);z-index:-1;
+}
+.landing-panel::after{
+  content:'';position:absolute;bottom:-80px;right:-80px;width:250px;height:250px;background:radial-gradient(circle, rgba(79,70,229,0.12) 0%, transparent 70%);border-radius:50%;filter:blur(40px);z-index:-1;
+}
+.hero-top{display:flex;flex-direction:column;gap:24px;}
+.hero-badge{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border-radius:999px;background:rgba(0,255,159,0.15);color:var(--green);font-family:var(--font-mono);font-size:0.78rem;letter-spacing:1.2px;text-transform:uppercase;width:fit-content;border:1px solid rgba(0,255,159,0.25);animation:float 3s ease-in-out infinite;}
+.hero-title{font-family:var(--font-hd);font-size:4.2rem;line-height:1;color:#fff;max-width:740px;letter-spacing:-1px;background:linear-gradient(135deg, #fff 0%, rgba(255,255,255,0.9) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hero-text{font-family:var(--font-mono);font-size:1.1rem;color:rgba(255,255,255,0.72);line-height:1.7;max-width:680px;}
+.hero-actions{display:flex;flex-wrap:wrap;gap:18px;margin-top:12px;}
+.hero-actions .discord-btn{min-width:200px;padding:14px 32px;font-size:0.9rem;}
+.hero-actions .secondary-btn{min-width:200px;}
+.secondary-btn{display:inline-flex;align-items:center;justify-content:center;padding:14px 32px;border-radius:999px;border:2px solid rgba(255,255,255,0.2);background:transparent;color:#fff;text-decoration:none;font-family:var(--font-hd);font-size:0.9rem;letter-spacing:0.8px;transition:all 0.3s;font-weight:700;position:relative;overflow:hidden;}
+.secondary-btn::before{
+  content:'';position:absolute;inset:0;background:rgba(0,245,255,0.08);transform:translateX(-100%);transition:transform 0.3s;z-index:-1;
+}
+.secondary-btn:hover{border-color:var(--cyan);background:rgba(0,245,255,0.08);transform:translateY(-2px);}
+.secondary-btn:hover::before{transform:translateX(0);}
+.landing-pills{display:none;}
+.landing-pill{font-family:var(--font-mono);font-size:0.78rem;padding:10px 14px;border-radius:999px;border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.78);background:rgba(255,255,255,0.03);}
+.panel-grid{display:none;}
+.hero-panel{display:none;}
+.stats-grid-landing{display:none;}
+.stats-card{display:none;}
+.feature-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;margin-top:28px;}
+.feature-card{background:rgba(255,255,255,0.03);border:2px solid rgba(255,255,255,0.1);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:all 0.3s;}
+.feature-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg, var(--green), var(--cyan), transparent);transform:scaleX(0);transform-origin:left;transition:transform 0.3s;
+}
+.feature-card:hover{border-color:var(--cyan);background:rgba(0,245,255,0.06);transform:translateY(-4px);box-shadow:0 20px 50px rgba(0,245,255,0.1);}
+.feature-card:hover::before{transform:scaleX(1);}
+.feature-card h4{font-family:var(--font-hd);font-size:1.2rem;color:#fff;margin-bottom:12px;}
+.feature-card p{font-family:var(--font-mono);font-size:0.95rem;color:rgba(255,255,255,0.76);line-height:1.7;}
+.demo-panel{display:none;}
+.demo-card{display:none;}
+.login-box{
+  position:sticky;top:24px;text-align:center;padding:46px 38px;
+  background:linear-gradient(135deg, rgba(10,20,40,0.98) 0%, rgba(15,20,40,0.96) 100%);
+  border:2px solid rgba(255,255,255,0.12);border-radius:28px;
+  max-width:100%;width:100%;box-shadow:0 40px 120px rgba(0,0,0,0.4), 0 0 80px rgba(79,70,229,0.12);
+}
+.login-box::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--pink),var(--cyan),var(--pink));animation:shimmer 2s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{box-shadow:0 0 0 rgba(79,70,229,0.3);} 50%{box-shadow:0 0 20px rgba(79,70,229,0.5);}}
+@keyframes float{0%,100%{transform:translateY(0px);} 50%{transform:translateY(-8px);}}
+.login-title{font-family:var(--font-hd);font-weight:900;font-size:3rem;letter-spacing:-1px;margin-bottom:10px;color:#fff;background:linear-gradient(135deg, #fff 0%, rgba(0,255,159,0.8) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.login-sub{font-family:var(--font-mono);font-size:0.82rem;color:rgba(255,255,255,0.68);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase;}
+.login-copy{font-family:var(--font-mono);font-size:0.98rem;color:rgba(255,255,255,0.72);line-height:1.8;margin-bottom:32px;}
+.discord-btn{display:inline-flex;align-items:center;gap:10px;background:linear-gradient(135deg,#0062ff,#4f46e5);color:#fff;padding:14px 32px;border-radius:999px;text-decoration:none;font-family:var(--font-hd);font-size:0.9rem;font-weight:800;letter-spacing:1.2px;transition:all 0.3s;box-shadow:0 24px 60px rgba(0,98,255,0.24);position:relative;overflow:hidden;}
+.discord-btn::before{
+  content:'';position:absolute;inset:0;background:linear-gradient(135deg, rgba(255,255,255,0.1), transparent);transform:translateX(-100%);transition:transform 0.3s;
+}
+.discord-btn:hover{box-shadow:0 0 40px rgba(0,98,255,0.35);transform:translateY(-2px);}
+.discord-btn:hover::before{transform:translateX(100%);}
+.login-action{width:100%;justify-content:center;}
+.login-deco{font-family:var(--font-mono);font-size:0.78rem;color:rgba(255,255,255,0.62);margin-top:24px;letter-spacing:0.7px;}
+.step-list{display:grid;gap:14px;margin-top:28px;}
+.step-item{display:flex;gap:16px;align-items:flex-start;padding:20px;border:2px solid rgba(255,255,255,0.08);border-radius:16px;background:rgba(255,255,255,0.02);transition:all 0.3s;position:relative;overflow:hidden;}
+.step-item::before{
+  content:'';position:absolute;inset:0;background:linear-gradient(135deg, rgba(0,255,159,0.05), transparent);transform:translateX(-100%);transition:transform 0.3s;z-index:-1;
+}
+.step-item:hover{border-color:rgba(0,255,159,0.4);background:rgba(0,255,159,0.05);transform:translateX(4px);}
+.step-item:hover::before{transform:translateX(0);}
+.step-number{min-width:40px;height:40px;display:grid;place-items:center;border-radius:50%;background:linear-gradient(135deg, rgba(0,255,159,0.2), rgba(0,255,159,0.1));color:var(--green);font-weight:900;font-family:var(--font-hd);font-size:1.1rem;flex-shrink:0;border:2px solid rgba(0,255,159,0.3);}
+.step-meta{font-family:var(--font-mono);color:rgba(255,255,255,0.78);font-size:0.95rem;line-height:1.6;}
+@media(max-width:1000px){
+  .login-screen{grid-template-columns:1fr;}
+  .login-box{position:relative;top:0;}
+  .hero-title{font-size:3.6rem;}
+  .feature-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:700px){
+  .hero-title{font-size:2.8rem;}
+  .feature-grid{grid-template-columns:1fr;}
+  .hero-actions{flex-direction:column;}
+}
+@media(max-width:560px){
+  #loginScreen{padding:16px;}
+  .login-box,.landing-panel{border-radius:20px;}
+  .hero-title{font-size:2.4rem;}
+  .login-title{font-size:2.4rem;}
+  .feature-card{padding:20px;}
+}
+
+
+/* ── Pricing cards ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px}
+.price-card{
+  background:var(--bg3);border:1px solid var(--border);
+  border-radius:6px;padding:20px;text-align:center;
+  transition:all 0.2s;cursor:pointer;position:relative;
+}
+.price-card:hover{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,245,255,0.1)}
+.price-card.current{border-color:var(--cyan);box-shadow:0 0 20px rgba(0,245,255,0.15)}
+.price-card.current::after{
+  content:'AKTIF';position:absolute;top:8px;right:8px;
+  font-family:var(--font-hd);font-size:0.45rem;font-weight:700;
+  color:var(--cyan);letter-spacing:1px;
+}
+.price-name{font-family:var(--font-hd);font-size:0.8rem;font-weight:700;margin-bottom:8px}
+.price-limit{font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);margin-bottom:12px}
+.price-amount{font-family:var(--font-hd);font-size:1.2rem;font-weight:900;margin-bottom:14px}
+
+/* ── Glitch anim ── */
+@keyframes glitch{
+  0%,100%{text-shadow:2px 0 var(--pink),-2px 0 var(--cyan)}
+  25%{text-shadow:-2px 0 var(--pink),2px 0 var(--cyan)}
+  50%{text-shadow:2px 2px var(--pink),-2px -2px var(--cyan)}
+  75%{text-shadow:-2px 2px var(--pink),2px -2px var(--cyan)}
+}
+.glitch{animation:glitch 4s infinite}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--cyan)}
+
+/* ── Mobile ── */
+/* ── Hamburger button ── */
+.hamburger{
+  display:none;flex-direction:column;justify-content:center;gap:5px;
+  width:36px;height:36px;padding:6px;cursor:pointer;
+  background:transparent;border:1px solid var(--border);border-radius:4px;
+  flex-shrink:0;
+}
+.hamburger span{
+  display:block;height:2px;background:var(--cyan);border-radius:2px;
+  transition:all 0.3s;
+}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* ── Sidebar overlay mobile ── */
+.sidebar-overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,0.6);z-index:199;
+}
+.sidebar-overlay.visible{display:block}
+
+@media(max-width:700px){
+  .hamburger{display:flex}
+  aside{
+    display:block;
+    position:fixed;left:-240px;top:0;bottom:0;
+    width:220px;z-index:200;
+    transition:left 0.3s ease;
+    padding-top:60px;
+    background:rgba(5,8,16,0.98);
+  }
+  aside.open{left:0}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .pricing-grid{grid-template-columns:1fr}
+  nav{padding:12px 16px}
+  main{padding:16px}
+  .logo{font-size:0.9rem}
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- Login Screen -->
+<div id="loginScreen">
+  <div class="login-screen">
+    <div class="landing-panel">
+      <div class="hero-top">
+        <div class="hero-badge">✨ UPLOAD AUDIO ROBLOX</div>
+        <div class="hero-title">Convert & Upload Audio ke Roblox</div>
+        <div class="hero-text">Upload file audio langsung dari device, bayar via DANA, dan lihat status moderation real-time di dashboard kami.</div>
+        <div class="hero-actions">
+          <a href="/auth/discord" class="discord-btn">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.09.119 18.12.143 18.14c2.053 1.508 4.041 2.423 5.993 3.029a.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.029.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+            Get Started
+          </a>
+          <a href="#upgrade" class="secondary-btn">Join Discord →</a>
+        </div>
+      </div>
+      <div class="feature-grid">
+        <div class="feature-card">
+          <h4>⚡ Fast Upload</h4>
+          <p>Upload file audio dengan cepat langsung ke Roblox Creator account kamu.</p>
+        </div>
+        <div class="feature-card">
+          <h4>💰 DANA Payment</h4>
+          <p>Pembayaran mudah via DANA dengan proses verifikasi instant dari admin.</p>
+        </div>
+        <div class="feature-card">
+          <h4>📊 Track Status</h4>
+          <p>Monitor status moderation real-time: Pending, Accepted, atau Rejected.</p>
+        </div>
+      </div>
+    </div>
+    <div class="login-box">
+      <div class="login-title">PENDOSA</div>
+      <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);letter-spacing:2px;margin-bottom:20px">⚡ BYPASS AUDIO</div>
+      <div class="login-copy">Konversi dan upload audio ke Roblox dengan speed & amplification control. Proses langsung, monitoring jelas.</div>
+      <a href="/auth/discord" class="discord-btn login-action">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.09.119 18.12.143 18.14c2.053 1.508 4.041 2.423 5.993 3.029a.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.029.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+        LOGIN WITH DISCORD
+      </a>
+      <div class="login-deco">No password needed. Secure OAuth 2.0 authentication.</div>
+      <div class="step-list">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-meta">Login dengan Discord account.</div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-meta">Pilih tier, bayar via DANA.</div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-meta">Upload bukti, tunggu konfirmasi.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none">
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+  <nav>
+    <div style="display:flex;align-items:center;gap:12px">
+      <button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Toggle menu">
+        <span></span><span></span><span></span>
+      </button>
+      <div class="logo">PENDOSA <span>BYPASS AUDIO</span></div>
+    </div>
+    <div class="nav-right">
+      <span id="navTierBadge" class="tier-badge"></span>
+      <span id="navUsername" class="nav-username"></span>
+      <img id="navAvatar" class="avatar" src="" alt=""/>
+      <a href="/auth/logout" class="btn btn-ghost btn-sm">LOGOUT</a>
+    </div>
+  </nav>
+
+  <div class="layout">
+    <aside id="sidebar">
+      <div class="nav-section">MENU</div>
+      <div class="nav-item active" onclick="showPage('dashboard');closeSidebar()" data-page="dashboard"><span class="icon">⚡</span>DASHBOARD</div>
+      <div class="nav-item" onclick="showPage('upload');closeSidebar()" data-page="upload"><span class="icon">📤</span>UPLOAD</div>
+      <div class="nav-item" onclick="showPage('history');closeSidebar()" data-page="history"><span class="icon">📋</span>HISTORY</div>
+      <div class="nav-divider"></div>
+      <div class="nav-section">AKUN</div>
+      <div class="nav-item" onclick="showPage('settings');closeSidebar()" data-page="settings"><span class="icon">⚙️</span>SETTINGS</div>
+      <div class="nav-item" onclick="showPage('upgrade');closeSidebar()" data-page="upgrade"><span class="icon">🚀</span>UPGRADE TIER</div>
+      <div class="nav-divider"></div>
+      <div id="adminNav" style="display:none">
+        <div class="nav-section">ADMIN</div>
+        <div class="nav-item" onclick="showPage('admin');closeSidebar()" data-page="admin"><span class="icon">👑</span>ADMIN PANEL</div>
+      </div>
+    </aside>
+
+    <main>
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page active">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">
+          ⚡ DASHBOARD
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-val" id="statUsed">0</div>
+            <div class="stat-label">UPLOAD BULAN INI</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val pink" id="statRemaining">0</div>
+            <div class="stat-label">SISA KUOTA</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-val yellow" id="statLimit">0</div>
+            <div class="stat-label">LIMIT BULANAN</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">KUOTA BULANAN</div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="font-family:var(--font-mono);font-size:0.75rem" id="quotaText">0 / 0</span>
+            <span style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted)" id="resetText"></span>
+          </div>
+          <div class="quota-bar"><div class="quota-fill" id="quotaFill" style="width:0%"></div></div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">TIER KAMU</div>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div id="dashTierBadge" style="font-family:var(--font-hd);font-size:1.5rem;font-weight:900"></div>
+            <div>
+              <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted)">Klik "Upgrade Tier" untuk naik level</div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="showPage('upgrade')">🚀 UPGRADE SEKARANG</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">💳 PAYMENT METHOD</div>
+          <div style="padding:14px;background:rgba(0,245,255,0.03);border:1px solid rgba(0,245,255,0.2);border-radius:4px">
+            <div style="font-family:var(--font-mono);font-size:0.85rem;color:var(--text);margin-bottom:8px">
+              <span style="color:var(--muted)">METODE PEMBAYARAN:</span>
+              <div style="margin-top:4px;color:var(--green);font-weight:600">💰 DANA</div>
+            </div>
+            <div style="font-family:var(--font-mono);font-size:0.75rem;color:var(--muted);margin-top:10px">
+              📱 Nomor Admin: <span style="color:var(--cyan);font-family:var(--font-hd)">0887-1467-543</span>
+            </div>
+            <div style="margin-top:12px;padding-top:12px;border-top:1px solid rgba(0,245,255,0.1)">
+              <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--muted);line-height:1.6">
+                ✓ Bayar untuk upgrade tier<br/>
+                ✓ Dapatkan kuota upload lebih banyak<br/>
+                ✓ Akses fitur premium
+              </div>
+            </div>
+            <button class="btn btn-primary" style="margin-top:12px;width:100%" onclick="showPage('upgrade')">💰 UPGRADE TIER SEKARANG</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- UPLOAD -->
+      <div id="page-upload" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">
+          📤 UPLOAD AUDIO
+        </div>
+
+        <div class="card">
+          <div class="card-title">ROBLOX SETTINGS</div>
+          <div id="noApiKeyWarn" style="display:none;padding:10px;background:rgba(255,230,0,0.05);border:1px solid rgba(255,230,0,0.3);border-radius:4px;margin-bottom:14px;font-family:var(--font-mono);font-size:0.75rem;color:var(--yellow)">
+            ⚠️ Kamu belum menyimpan API Key. <span style="cursor:pointer;text-decoration:underline" onclick="showPage('settings')">Pergi ke Settings</span>
+          </div>
+          <div id="apiKeyOk" style="display:none;padding:10px;background:rgba(0,255,159,0.05);border:1px solid rgba(0,255,159,0.3);border-radius:4px;margin-bottom:14px;font-family:var(--font-mono);font-size:0.75rem;color:var(--green)">
+            ✅ API Key tersimpan — siap upload
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">FILE AUDIO</div>
+          <div class="dropzone" id="dropzone" onclick="document.getElementById('fileInput').click()"
+            ondragover="event.preventDefault();this.classList.add('drag')"
+            ondragleave="this.classList.remove('drag')"
+            ondrop="handleDrop(event)">
+            <span class="dz-icon">🎵</span>
+            <div class="dz-text">KLIK ATAU DRAG & DROP FILE AUDIO</div>
+            <div class="dz-sub">MP3 · WAV · OGG · FLAC · AAC — MAX 150MB/FILE</div>
+          </div>
+          <input type="file" id="fileInput" accept="audio/*" multiple style="display:none" onchange="handleFiles(this.files)"/>
+
+          <div id="fileListWrap" style="display:none;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-family:var(--font-mono);font-size:0.7rem;color:var(--muted)" id="fileListSummary"></span>
+              <button class="btn btn-ghost btn-sm" onclick="clearFileList()">✕ HAPUS SEMUA</button>
+            </div>
+            <div id="fileListItems" style="display:flex;flex-direction:column;gap:4px;max-height:250px;overflow-y:auto"></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">AUDIO OPTIONS</div>
+          <div class="slider-wrap">
+            <div class="slider-label">
+              <label>UPLOAD SPEED (TEMPO)</label>
+              <span class="slider-val" id="speedVal">1.0×</span>
+            </div>
+            <input type="range" id="speedSlider" min="0.5" max="2.0" step="0.05" value="1.0" oninput="updateSlider('speed',this.value,'×')"/>
+            <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--muted);margin-top:4px">Speed > 1× = gunakan PlaybackSpeed di Roblox</div>
+          </div>
+          <div class="slider-wrap">
+            <div class="slider-label">
+              <label>PITCH SHIFT</label>
+              <span class="slider-val" id="pitchVal">0 st</span>
+            </div>
+            <input type="range" id="pitchSlider" min="-12" max="12" step="1" value="0" oninput="updateSlider('pitch',this.value,' st')"/>
+          </div>
+          <div class="switch-wrap">
+            <span class="switch-label">VOLUME NORMALIZATION</span>
+            <label class="switch"><input type="checkbox" id="normalizeToggle" checked/><span class="switch-slider"></span></label>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">UPLOAD PROGRESS</div>
+          <div class="progress-wrap">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-text" id="progressText">Siap upload</div>
+          </div>
+          <button class="btn btn-primary" id="uploadBtn" onclick="startUpload()" disabled>
+            ⚡ MULAI UPLOAD
+          </button>
+        </div>
+
+        <div class="card" id="uploadLogCard" style="display:none">
+          <div class="card-title">UPLOAD LOG</div>
+          <ul class="log-list" id="logList"></ul>
+        </div>
+      </div>
+
+      <!-- HISTORY -->
+      <div id="page-history" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">📋 HISTORY</div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">RIWAYAT UPLOAD</div>
+            <button class="btn btn-ghost btn-sm" onclick="loadHistory()">🔄 REFRESH</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>FILE</th><th>ASSET ID</th><th>STATUS</th><th>TANGGAL</th></tr></thead>
+              <tbody id="historyBody"><tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="page-settings" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">⚙️ SETTINGS</div>
+        <div class="card">
+          <div class="card-title">ROBLOX CREDENTIALS</div>
+          <div class="input-group">
+            <label>CREATOR TYPE</label>
+            <div class="toggle-group">
+              <button class="toggle-btn active" id="toggleUser" onclick="setCreatorType('user')">👤 PERSONAL</button>
+              <button class="toggle-btn" id="toggleGroup" onclick="setCreatorType('group')">👥 GROUP</button>
+            </div>
+          </div>
+          <div class="input-group">
+            <label>USER ID ROBLOX</label>
+            <input type="text" id="setUserId" placeholder="Contoh: 8879389684"/>
+          </div>
+          <div class="input-group" id="groupIdWrap" style="display:none">
+            <label>GROUP ID ROBLOX</label>
+            <input type="text" id="setGroupId" placeholder="Contoh: 12345678"/>
+          </div>
+          <div class="input-group">
+            <label>API KEY (ROBLOX OPEN CLOUD)</label>
+            <input type="password" id="setApiKey" placeholder="••••••••••••••••••••••••••"/>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="saveSettings()">💾 SIMPAN</button>
+            <button class="btn btn-ghost btn-sm" id="validateBtn" onclick="validateKey()">🔍 TEST API KEY</button>
+          </div>
+          <div id="validateResult" style="display:none;margin-top:12px;padding:10px 14px;border-radius:4px;font-family:var(--font-mono);font-size:0.75rem"></div>
+        </div>
+      </div>
+
+      <!-- UPGRADE -->
+      <div id="page-upgrade" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--cyan);margin-bottom:20px">🚀 UPGRADE TIER</div>
+
+        <div class="card">
+          <div class="card-title">PILIH TIER</div>
+          <div class="pricing-grid" id="pricingGrid"></div>
+        </div>
+
+        <div class="card" id="paymentFormCard" style="display:none">
+          <div class="card-title">FORM UPGRADE</div>
+          <div style="padding:12px;background:rgba(0,245,255,0.03);border:1px solid rgba(0,245,255,0.2);border-radius:4px;margin-bottom:14px;font-family:var(--font-mono);font-size:0.75rem">
+            <div style="color:var(--cyan);margin-bottom:6px;font-family:var(--font-hd);font-size:0.65rem;letter-spacing:2px">CARA PEMBAYARAN via DANA:</div>
+            <div style="color:var(--muted)">1. Bayar terlebih dahulu via DANA ke nomor admin.</div>
+            <div style="color:var(--muted)">2. Simpan screenshot bukti pembayaran.</div>
+            <div style="color:var(--muted)">3. Upload bukti DANA di form di bawah.</div>
+            <div style="color:var(--muted)">4. Tunggu konfirmasi admin dalam 24 jam.</div>
+          </div>
+          <div class="input-group">
+            <label>TIER TUJUAN</label>
+            <input type="text" id="payTierDisplay" readonly style="color:var(--cyan)"/>
+          </div>
+          <div class="input-group">
+            <label>TOTAL PEMBAYARAN</label>
+            <input type="text" id="payAmountDisplay" readonly style="color:var(--yellow)"/>
+          </div>
+          <div class="input-group">
+            <label>BUKTI TRANSFER (SS)</label>
+            <input type="file" id="payProof" accept="image/*"/>
+          </div>
+          <div class="input-group">
+            <label>CATATAN (OPSIONAL)</label>
+            <input type="text" id="payNote" placeholder="Contoh: transfer via BCA 08:30"/>
+          </div>
+          <button class="btn btn-primary" onclick="submitPayment()">📨 KIRIM REQUEST</button>
+        </div>
+
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">RIWAYAT REQUEST</div>
+            <button class="btn btn-ghost btn-sm" onclick="loadMyPayments()">🔄 REFRESH</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>TIER</th><th>NOMINAL</th><th>STATUS</th><th>NOTE ADMIN</th><th>TANGGAL</th></tr></thead>
+              <tbody id="myPaymentsBody"><tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Loading...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div id="page-admin" class="page">
+        <div class="card-title" style="font-family:var(--font-hd);font-size:1rem;font-weight:900;color:var(--yellow);margin-bottom:20px">👑 ADMIN PANEL</div>
+
+        <div class="stats-grid" id="adminStats">
+          <div class="stat-card"><div class="stat-val" id="aStatUsers">-</div><div class="stat-label">TOTAL USER</div></div>
+          <div class="stat-card"><div class="stat-val green" id="aStatUploads">-</div><div class="stat-label">TOTAL UPLOAD</div></div>
+          <div class="stat-card"><div class="stat-val pink" id="aStatPending">-</div><div class="stat-label">PENDING PAYMENT</div></div>
+          <div class="stat-card"><div class="stat-val yellow" id="aStatToday">-</div><div class="stat-label">UPLOAD HARI INI</div></div>
+        </div>
+
+        <!-- Pending Payments -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">PAYMENT REQUESTS</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="loadAdminPayments('pending')">PENDING</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadAdminPayments('approved')">APPROVED</button>
+              <button class="btn btn-ghost btn-sm" onclick="loadAdminPayments('rejected')">REJECTED</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>USER</th><th>TIER</th><th>NOMINAL</th><th>BUKTI</th><th>TANGGAL</th><th>ACTION</th></tr></thead>
+              <tbody id="adminPaymentsBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- User management -->
+        <div class="card">
+          <div class="card-title">MANAGE USERS</div>
+          <div style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap">
+            <input type="text" id="userSearch" placeholder="Cari username / Discord ID..." style="flex:1;min-width:200px" oninput="loadAdminUsers()"/>
+            <select id="userTierFilter" onchange="loadAdminUsers()" style="width:140px">
+              <option value="">SEMUA TIER</option>
+              <option value="free">FREE</option>
+              <option value="bronze">BRONZE</option>
+              <option value="silver">SILVER</option>
+              <option value="gold">GOLD</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>USER</th><th>TIER</th><th>UPLOAD</th><th>JOIN</th><th>ACTION</th></tr></thead>
+              <tbody id="adminUsersBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Server logs -->
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+            <div class="card-title" style="margin:0">SERVER LOGS</div>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="loadAdminLogs()">🔄 REFRESH</button>
+              <button class="btn btn-danger btn-sm" onclick="clearAdminLogs()">🗑️ HAPUS</button>
+            </div>
+          </div>
+          <div id="adminLogList" style="font-family:var(--font-mono);font-size:0.72rem;display:flex;flex-direction:column;gap:4px;max-height:300px;overflow-y:auto"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────
+let me = null;
+let selectedFiles = [];
+let isUploading = false;
+let creatorType = "user";
+let selectedPayTier = null;
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch("/api/me");
+    if (!res.ok) { document.getElementById("loginScreen").style.display = "flex"; return; }
+    me = await res.json();
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    renderNav();
+    showPage("dashboard");
+    renderDashboard();
+    if (me.isAdmin) document.getElementById("adminNav").style.display = "block";
+    loadHistory();
+    loadMyPayments();
+    // Init slider fills
+    updateSlider("speed", document.getElementById("speedSlider").value, "×");
+    updateSlider("pitch", document.getElementById("pitchSlider").value, " st");
+  } catch {
+    document.getElementById("loginScreen").style.display = "flex";
+  }
+}
+
+function renderNav() {
+  document.getElementById("navUsername").textContent = me.username;
+  document.getElementById("navAvatar").src = me.avatar
+    ? `https://cdn.discordapp.com/avatars/${me.discord_id}/${me.avatar}.png`
+    : `https://cdn.discordapp.com/embed/avatars/0.png`;
+  const badge = document.getElementById("navTierBadge");
+  badge.textContent = me.tier.toUpperCase();
+  badge.className = `tier-badge tier-${me.tier}`;
+}
+
+function renderDashboard() {
+  document.getElementById("statUsed").textContent = me.uploads_used;
+  document.getElementById("statRemaining").textContent = me.isUnlimited ? "∞" : me.remaining;
+  document.getElementById("statLimit").textContent = me.isUnlimited ? "∞" : me.tierInfo.limit;
+
+  const pct = me.isUnlimited ? 20 : Math.min((me.uploads_used / me.tierInfo.limit) * 100, 100);
+  document.getElementById("quotaFill").style.width = pct + "%";
+  if (pct > 80) document.getElementById("quotaFill").classList.add("danger");
+  document.getElementById("quotaText").textContent = me.isUnlimited ? `${me.uploads_used} / ∞` : `${me.uploads_used} / ${me.tierInfo.limit}`;
+  document.getElementById("resetText").textContent = `Reset: ${me.reset_date}`;
+
+  const tierColors = {free:"#888",bronze:"#cd7f32",silver:"#c0c0c0",gold:"#ffd700"};
+  const db = document.getElementById("dashTierBadge");
+  db.textContent = me.tier.toUpperCase();
+  db.style.color = tierColors[me.tier] || "#888";
+
+  // Upload page API key warning
+  if (me.roblox_api_key) {
+    document.getElementById("noApiKeyWarn").style.display = "none";
+    document.getElementById("apiKeyOk").style.display = "block";
+  } else {
+    document.getElementById("noApiKeyWarn").style.display = "block";
+    document.getElementById("apiKeyOk").style.display = "none";
+  }
+
+  // Settings pre-fill
+  if (me.roblox_user_id) document.getElementById("setUserId").value = me.roblox_user_id;
+  if (me.roblox_group_id) document.getElementById("setGroupId").value = me.roblox_group_id;
+  if (me.creator_type) setCreatorType(me.creator_type);
+
+  renderPricing();
+}
+
+// ── Pages ─────────────────────────────────────────────────────
+function showPage(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-item").forEach(n => n.classList.remove("active"));
+  document.getElementById(`page-${name}`).classList.add("active");
+  document.querySelector(`[data-page="${name}"]`)?.classList.add("active");
+  if (name === "admin") { loadAdminStats(); loadAdminPayments("pending"); loadAdminUsers(); loadAdminLogs(); }
+  if (name === "history") loadHistory();
+}
+
+// ── Settings ──────────────────────────────────────────────────
+function setCreatorType(type) {
+  creatorType = type;
+  document.getElementById("toggleUser").classList.toggle("active", type === "user");
+  document.getElementById("toggleGroup").classList.toggle("active", type === "group");
+  document.getElementById("groupIdWrap").style.display = type === "group" ? "block" : "none";
+}
+
+async function saveSettings() {
+  const body = {
+    roblox_user_id: document.getElementById("setUserId").value.trim(),
+    roblox_group_id: document.getElementById("setGroupId").value.trim(),
+    roblox_api_key: document.getElementById("setApiKey").value.trim(),
+    creator_type: creatorType,
+  };
+  if (!body.roblox_api_key) delete body.roblox_api_key;
+  const res = await fetch("/api/settings", { method: "POST", headers: {"Content-Type":"application/json"}, body: JSON.stringify(body) });
+  if (res.ok) { toast("✅ Settings disimpan!"); me = await (await fetch("/api/me")).json(); renderDashboard(); }
+  else toast("❌ Gagal simpan settings");
+}
+
+async function validateKey() {
+  const btn = document.getElementById("validateBtn");
+  const resultEl = document.getElementById("validateResult");
+  btn.disabled = true; btn.textContent = "⏳ MENGECEK...";
+  resultEl.style.display = "none";
+  const res = await fetch("/api/validate-key", { method: "POST" });
+  const data = await res.json();
+  resultEl.style.display = "block";
+  if (data.valid) {
+    resultEl.style.background = "rgba(0,255,159,0.05)";
+    resultEl.style.border = "1px solid rgba(0,255,159,0.3)";
+    resultEl.style.color = "var(--green)";
+    resultEl.innerHTML = `✅ API KEY VALID — ${data.name}`;
+  } else {
+    resultEl.style.background = "rgba(255,45,120,0.05)";
+    resultEl.style.border = "1px solid rgba(255,45,120,0.3)";
+    resultEl.style.color = "var(--pink)";
+    resultEl.innerHTML = `❌ API KEY INVALID — ${typeof data.error === "object" ? JSON.stringify(data.error) : data.error}`;
+  }
+  btn.disabled = false; btn.textContent = "🔍 TEST API KEY";
+}
+
+// ── File handling ──────────────────────────────────────────────
+function formatSize(b) { if(b<1024)return b+"B"; if(b<1048576)return(b/1024).toFixed(0)+"KB"; return(b/1048576).toFixed(1)+"MB"; }
+
+function handleFiles(files) {
+  const valid = Array.from(files).filter(f => f.type.startsWith("audio/") || /\.(mp3|wav|ogg|flac|aac|m4a)$/i.test(f.name));
+  if (!valid.length) return toast("⚠️ Tidak ada file audio valid");
+  const existing = selectedFiles.map(f => f.name);
+  const newFiles = valid.filter(f => !existing.includes(f.name));
+  if (valid.length - newFiles.length > 0) toast(`ℹ️ ${valid.length - newFiles.length} duplikat diabaikan`);
+  selectedFiles = [...selectedFiles, ...newFiles];
+  renderFileList(); updateBtn();
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById("dropzone").classList.remove("drag");
+  handleFiles(e.dataTransfer.files);
+}
+
+function clearFileList() {
+  if (isUploading) return toast("⚠️ Upload sedang berjalan");
+  selectedFiles = [];
+  renderFileList(); updateBtn();
+  document.getElementById("fileInput").value = "";
+}
+
+function removeFile(i) {
+  if (isUploading) return;
+  selectedFiles.splice(i, 1);
+  renderFileList(); updateBtn();
+}
+
+function renderFileList() {
+  const wrap = document.getElementById("fileListWrap");
+  const container = document.getElementById("fileListItems");
+  const summary = document.getElementById("fileListSummary");
+  if (!selectedFiles.length) { wrap.style.display = "none"; return; }
+  wrap.style.display = "block";
+  const total = selectedFiles.reduce((a, f) => a + f.size, 0);
+  summary.textContent = `${selectedFiles.length} FILE — ${formatSize(total)} TOTAL`;
+  container.innerHTML = selectedFiles.map((f, i) => `
+    <div class="file-item pending" id="fitem_${i}">
+      <span>🎵</span>
+      <div style="flex:1;min-width:0">
+        <div class="file-item-name">${f.name}</div>
+        <div id="fitem_aid_${i}" class="file-item-assetid" style="display:none"></div>
+      </div>
+      <span class="file-item-size">${formatSize(f.size)}</span>
+      <span id="fitem_st_${i}" style="font-family:var(--font-mono);font-size:0.7rem;flex-shrink:0">—</span>
+      ${!isUploading ? `<span onclick="removeFile(${i})" style="cursor:pointer;color:var(--muted);flex-shrink:0">✕</span>` : ""}
+    </div>`).join("");
+}
+
+function updateFileItemStatus(i, status, assetId, error) {
+  const item = document.getElementById(`fitem_${i}`);
+  const st = document.getElementById(`fitem_st_${i}`);
+  const aid = document.getElementById(`fitem_aid_${i}`);
+  if (!item) return;
+  item.className = `file-item ${status}`;
+  if (status === "uploading") { st.textContent = "⏳"; st.style.color = "var(--cyan)"; }
+  else if (status === "success") {
+    st.textContent = "✅"; st.style.color = "var(--green)";
+    if (assetId) { aid.style.display = "block"; aid.textContent = `ID: ${assetId}`; aid.onclick = () => copyText(assetId, aid); }
+  } else if (status === "failed") {
+    st.textContent = "❌"; st.style.color = "var(--pink)";
+    if (error) { aid.style.display = "block"; aid.style.color = "var(--pink)"; aid.textContent = error.slice(0, 60); }
+  }
+}
+
+function updateBtn() {
+  document.getElementById("uploadBtn").disabled = !selectedFiles.length || isUploading || !me?.roblox_api_key;
+}
+
+// ── Upload ─────────────────────────────────────────────────────
+async function startUpload() {
+  if (!selectedFiles.length || isUploading) return;
+  if (!me?.roblox_api_key) return toast("⚠️ Simpan API Key dulu di Settings");
+  isUploading = true; updateBtn(); renderFileList();
+
+  const formData = new FormData();
+  selectedFiles.forEach(f => formData.append("files", f));
+  formData.append("speed", document.getElementById("speedSlider").value);
+  formData.append("pitch", document.getElementById("pitchSlider").value);
+  formData.append("normalize", document.getElementById("normalizeToggle").checked);
+
+  const bar = document.getElementById("progressFill");
+  const text = document.getElementById("progressText");
+  const logList = document.getElementById("logList");
+  const logCard = document.getElementById("uploadLogCard");
+  logList.innerHTML = ""; logCard.style.display = "block";
+  bar.style.width = "0%"; text.textContent = "Memulai upload...";
+
+  try {
+    const res = await fetch("/api/upload", { method: "POST", body: formData });
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split("\n");
+      buffer = lines.pop();
+      for (const line of lines) {
+        if (!line.startsWith("data:")) continue;
+        try {
+          const evt = JSON.parse(line.slice(5));
+
+          if (evt.type === "warn") toast("⚠️ " + evt.msg);
+
+          if (evt.type === "progress") {
+            const pct = ((evt.index - 1) / evt.total * 100).toFixed(0);
+            bar.style.width = pct + "%";
+            const lbl = { ffmpeg: "🔄 FFmpeg...", uploading: "📤 Uploading..." }[evt.status] || "⚙️";
+            text.textContent = `${evt.index} / ${evt.total} — ${lbl}`;
+            updateFileItemStatus(evt.index - 1, "uploading");
+
+            let item = document.getElementById(`log_${evt.index}`);
+            if (!item) { item = document.createElement("li"); item.id = `log_${evt.index}`; item.className = "log-item processing"; logList.appendChild(item); }
+            item.innerHTML = `<span>⏳</span><div><div class="log-name">${evt.file}</div><div class="log-detail">${lbl}</div></div>`;
+          }
+
+          if (evt.type === "result") {
+            const pct = Math.min((evt.index / evt.total * 100), 99).toFixed(0);
+            bar.style.width = pct + "%";
+            if (evt.status === "SUCCESS") updateFileItemStatus(evt.index - 1, "success", evt.assetId);
+            else updateFileItemStatus(evt.index - 1, "failed", null, evt.error);
+
+            let item = document.getElementById(`log_${evt.index}`);
+            if (!item) { item = document.createElement("li"); item.id = `log_${evt.index}`; logList.appendChild(item); }
+            if (evt.status === "SUCCESS") {
+              item.className = "log-item success";
+              item.innerHTML = `<span>✅</span><div><div class="log-name">${evt.file}</div><div class="log-detail">ASSET ID: <span class="asset-id" onclick="copyText('${evt.assetId}',this)">${evt.assetId}</span></div></div>`;
+            } else {
+              item.className = "log-item failed";
+              item.innerHTML = `<span>❌</span><div><div class="log-name">${evt.file}</div><div class="log-detail" style="color:var(--pink)">${evt.error || "Gagal"}</div></div>`;
+            }
+          }
+
+          if (evt.type === "done") {
+            bar.style.width = "100%";
+            text.textContent = `✅ SELESAI — ${evt.success}/${evt.total} berhasil`;
+            toast(`🎉 ${evt.success}/${evt.total} BERHASIL!`);
+            me = await (await fetch("/api/me")).json();
+            renderDashboard();
+          }
+        } catch {}
+      }
+    }
+  } catch (e) { toast("❌ Error: " + e.message); }
+  finally { isUploading = false; updateBtn(); renderFileList(); }
+}
+
+// ── Sliders ───────────────────────────────────────────────────
+function updateSlider(type, val, unit) {
+  document.getElementById(`${type}Val`).textContent = parseFloat(val).toFixed(type === "speed" ? 2 : 0) + unit;
+  const el = document.getElementById(`${type}Slider`);
+  const min = parseFloat(el.min), max = parseFloat(el.max), v = parseFloat(val);
+  const pct = ((v - min) / (max - min) * 100).toFixed(1) + "%";
+  el.style.setProperty("--val", pct);
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById("sidebar");
+  const btn = document.getElementById("hamburgerBtn");
+  const overlay = document.getElementById("sidebarOverlay");
+  sb.classList.toggle("open");
+  btn.classList.toggle("open");
+  overlay.classList.toggle("visible");
+}
+
+function closeSidebar() {
+  document.getElementById("sidebar").classList.remove("open");
+  document.getElementById("hamburgerBtn").classList.remove("open");
+  document.getElementById("sidebarOverlay").classList.remove("visible");
+}
+
+// ── History ───────────────────────────────────────────────────
+async function loadHistory() {
+  const res = await fetch("/api/history");
+  const rows = await res.json();
+  const tbody = document.getElementById("historyBody");
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">Belum ada history</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.filename}</td>
+      <td>${r.asset_id ? `<span class="asset-id" onclick="copyText('${r.asset_id}',this)">${r.asset_id}</span>` : "—"}</td>
+      <td><span class="badge badge-${r.status.toLowerCase()}">${r.status}</span></td>
+      <td style="color:var(--muted)">${r.created_at?.slice(0,16) || "—"}</td>
+    </tr>`).join("");
+}
+
+// ── Pricing & Payment ─────────────────────────────────────────
+const TIER_DATA = {
+  free:   { name: "FREE",   limit: "50/bulan",  price: "GRATIS",         color: "#888",    priceNum: 0 },
+  bronze: { name: "BRONZE", limit: "200/bulan", price: "Rp 50.000",      color: "#cd7f32", priceNum: 50000 },
+  silver: { name: "SILVER", limit: "500/bulan", price: "Rp 100.000",     color: "#c0c0c0", priceNum: 100000 },
+  gold:   { name: "GOLD",   limit: "UNLIMITED", price: "Rp 180.000",     color: "#ffd700", priceNum: 180000 },
+};
+
+function renderPricing() {
+  const grid = document.getElementById("pricingGrid");
+  grid.innerHTML = Object.entries(TIER_DATA).map(([key, t]) => `
+    <div class="price-card ${me?.tier === key ? "current" : ""}" onclick="selectTier('${key}')" style="border-color:${me?.tier === key ? t.color : ""}">
+      <div class="price-name" style="color:${t.color}">${t.name}</div>
+      <div class="price-limit">${t.limit}</div>
+      <div class="price-amount" style="color:${t.color}">${t.price}</div>
+      ${key !== "free" && me?.tier !== key ? `<button class="btn btn-ghost btn-sm" style="width:100%;border-color:${t.color};color:${t.color}">PILIH</button>` : ""}
+    </div>`).join("");
+}
+
+function selectTier(tier) {
+  if (tier === "free" || tier === me?.tier) return;
+  selectedPayTier = tier;
+  const t = TIER_DATA[tier];
+  document.getElementById("payTierDisplay").value = t.name;
+  document.getElementById("payAmountDisplay").value = t.price;
+  document.getElementById("paymentFormCard").style.display = "block";
+  document.getElementById("paymentFormCard").scrollIntoView({ behavior: "smooth" });
+}
+
+async function submitPayment() {
+  if (!selectedPayTier) return toast("⚠️ Pilih tier dulu");
+  const proof = document.getElementById("payProof").files[0];
+  const note = document.getElementById("payNote").value;
+  const form = new FormData();
+  form.append("target_tier", selectedPayTier);
+  form.append("note", note);
+  if (proof) form.append("proof", proof);
+
+  const res = await fetch("/api/payment/request", { method: "POST", body: form });
+  const data = await res.json();
+  if (res.ok) { toast("✅ Request terkirim! Tunggu konfirmasi admin"); loadMyPayments(); document.getElementById("paymentFormCard").style.display = "none"; }
+  else toast("❌ " + data.error);
+}
+
+async function loadMyPayments() {
+  const res = await fetch("/api/payment/my-requests");
+  const rows = await res.json();
+  const tbody = document.getElementById("myPaymentsBody");
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Belum ada request</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td><span class="tier-badge tier-${r.target_tier}">${r.target_tier.toUpperCase()}</span></td>
+      <td style="color:var(--yellow)">Rp ${r.amount.toLocaleString()}</td>
+      <td><span class="badge badge-${r.status}">${r.status.toUpperCase()}</span></td>
+      <td style="color:var(--muted);font-size:0.65rem">${r.note || "—"}</td>
+      <td style="color:var(--muted)">${r.created_at?.slice(0,16) || "—"}</td>
+    </tr>`).join("");
+}
+
+// ── Admin ─────────────────────────────────────────────────────
+async function loadAdminStats() {
+  const d = await (await fetch("/api/admin/stats")).json();
+  document.getElementById("aStatUsers").textContent = d.totalUsers;
+  document.getElementById("aStatUploads").textContent = d.totalUploads;
+  document.getElementById("aStatPending").textContent = d.pendingPayments;
+  document.getElementById("aStatToday").textContent = d.todayUploads;
+}
+
+async function loadAdminPayments(status = "pending") {
+  const rows = await (await fetch(`/api/admin/payments?status=${status}`)).json();
+  const tbody = document.getElementById("adminPaymentsBody");
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">Tidak ada data</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <img src="${r.avatar ? `https://cdn.discordapp.com/avatars/${r.discord_id}/${r.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/0.png"}" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border)"/>
+          <span>${r.username}</span>
+        </div>
+      </td>
+      <td><span class="tier-badge tier-${r.target_tier}">${r.target_tier.toUpperCase()}</span></td>
+      <td style="color:var(--yellow)">Rp ${r.amount.toLocaleString()}</td>
+      <td>${r.proof_url ? `<a href="${r.proof_url}" target="_blank" style="color:var(--cyan);font-size:0.7rem">LIHAT SS</a>` : "—"}</td>
+      <td style="color:var(--muted)">${r.created_at?.slice(0,16) || "—"}</td>
+      <td>
+        ${r.status === "pending" ? `
+          <div style="display:flex;gap:4px">
+            <button class="btn btn-success btn-sm" onclick="reviewPayment(${r.id},'approve')">✅</button>
+            <button class="btn btn-danger btn-sm" onclick="reviewPayment(${r.id},'reject')">❌</button>
+          </div>` : `<span class="badge badge-${r.status}">${r.status.toUpperCase()}</span>`}
+      </td>
+    </tr>`).join("");
+}
+
+async function reviewPayment(id, action) {
+  const note = action === "reject" ? prompt("Alasan reject (opsional):") : null;
+  const res = await fetch(`/api/admin/payments/${id}`, {
+    method: "PATCH", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ action, note })
+  });
+  if (res.ok) { toast(`✅ Payment ${action === "approve" ? "APPROVED" : "REJECTED"}`); loadAdminPayments("pending"); loadAdminStats(); }
+  else toast("❌ Gagal");
+}
+
+async function loadAdminUsers() {
+  const search = document.getElementById("userSearch").value;
+  const tier = document.getElementById("userTierFilter").value;
+  const rows = await (await fetch(`/api/admin/users?search=${encodeURIComponent(search)}&tier=${tier}`)).json();
+  const tbody = document.getElementById("adminUsersBody");
+  if (!rows.length) { tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:20px">Tidak ada user</td></tr>`; return; }
+  tbody.innerHTML = rows.map(r => `
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px">
+          <img src="${r.avatar ? `https://cdn.discordapp.com/avatars/${r.discord_id}/${r.avatar}.png` : "https://cdn.discordapp.com/embed/avatars/0.png"}" style="width:24px;height:24px;border-radius:50%;border:1px solid var(--border)"/>
+          <div>
+            <div>${r.username}</div>
+            <div style="font-size:0.6rem;color:var(--muted)">${r.discord_id}</div>
+          </div>
+        </div>
+      </td>
+      <td>
+        <select onchange="setUserTier(${r.id}, this.value)" style="width:90px;padding:4px 6px;font-size:0.65rem">
+          ${["free","bronze","silver","gold"].map(t => `<option value="${t}" ${r.tier===t?"selected":""}>${t.toUpperCase()}</option>`).join("")}
+        </select>
+      </td>
+      <td style="font-family:var(--font-mono)">${r.uploads_used}</td>
+      <td style="color:var(--muted)">${r.created_at?.slice(0,10) || "—"}</td>
+      <td>
+        <button class="btn ${r.banned ? "btn-success" : "btn-danger"} btn-sm" onclick="toggleBan(${r.id}, ${r.banned})">
+          ${r.banned ? "UNBAN" : "BAN"}
+        </button>
+      </td>
+    </tr>`).join("");
+}
+
+async function setUserTier(id, tier) {
+  const res = await fetch(`/api/admin/users/${id}`, {
+    method: "PATCH", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ tier })
+  });
+  if (res.ok) toast(`✅ Tier diubah ke ${tier.toUpperCase()}`);
+  else toast("❌ Gagal ubah tier");
+}
+
+async function toggleBan(id, currentBanned) {
+  const reason = currentBanned ? null : prompt("Alasan ban:");
+  if (!currentBanned && reason === null) return;
+  const res = await fetch(`/api/admin/users/${id}`, {
+    method: "PATCH", headers: {"Content-Type":"application/json"},
+    body: JSON.stringify({ banned: !currentBanned, ban_reason: reason })
+  });
+  if (res.ok) { toast(currentBanned ? "✅ User di-unban" : "⚠️ User di-ban"); loadAdminUsers(); }
+}
+
+async function loadAdminLogs() {
+  const rows = await (await fetch("/api/admin/logs?limit=100")).json();
+  const container = document.getElementById("adminLogList");
+  const colors = { success: "var(--green)", error: "var(--pink)", warn: "var(--yellow)", info: "var(--muted)" };
+  if (!rows.length) { container.innerHTML = `<div style="color:var(--muted);text-align:center;padding:20px">Belum ada log</div>`; return; }
+  container.innerHTML = rows.map(l => {
+    const time = l.created_at?.slice(11,19) || "";
+    const c = colors[l.type] || "var(--muted)";
+    return `<div style="padding:5px 8px;border-radius:3px;background:rgba(255,255,255,0.02);border-left:3px solid ${c}">
+      <span style="color:var(--muted);margin-right:8px">${time}</span>
+      <span style="color:${c}">${l.msg}</span>
+    </div>`;
+  }).join("");
+}
+
+async function clearAdminLogs() {
+  await fetch("/api/admin/logs", { method: "DELETE" });
+  loadAdminLogs(); toast("🗑️ Logs dihapus");
+}
+
+// ── Utils ─────────────────────────────────────────────────────
+function copyText(text, el) {
+  navigator.clipboard.writeText(text).then(() => {
+    const orig = el.textContent;
+    el.textContent = "✅ COPIED!";
+    setTimeout(() => el.textContent = orig, 1500);
+  });
+}
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
+}
+
+init();
+</script>
+</body>
+</html>
