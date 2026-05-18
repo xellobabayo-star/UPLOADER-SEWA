@@ -1,0 +1,1089 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>PENDOSA BYPASS AUDIO – Platform Upload Audio Roblox #1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ════════════════════════════════════════════════════════
+   BASE — CSS Variables & Global Reset (Standalone)
+   ════════════════════════════════════════════════════════ */
+:root {
+  --bg:       #050810;
+  --bg2:      #080d1a;
+  --bg3:      #0d1426;
+  --cyan:     #00f5ff;
+  --pink:     #ff2d78;
+  --yellow:   #ffe600;
+  --green:    #00ff9f;
+  --purple:   #a855f7;
+  --text:     #e2e8f0;
+  --muted:    #4a5568;
+  --border:   rgba(0,245,255,0.15);
+  --font-hd:  'Orbitron', monospace;
+  --font-mono:'Share Tech Mono', monospace;
+  --font-body:'Rajdhani', sans-serif;
+}
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Scanline overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+  pointer-events: none; z-index: 9999;
+}
+
+/* Noise texture */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity: 0.4; pointer-events: none; z-index: 9998;
+}
+
+/* Grid background */
+.grid-bg {
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+  background-size: 40px 40px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Shared animations */
+@keyframes orb1  { 0%,100%{transform:translate(0,0) scale(1)}   50%{transform:translate(30px,-40px) scale(1.1)} }
+@keyframes orb2  { 0%,100%{transform:translate(0,0) scale(1)}   50%{transform:translate(-40px,30px) scale(0.9)} }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)}         50%{opacity:0.5;transform:scale(1.4)} }
+@keyframes glitch {
+  0%,100%{text-shadow: 2px 0 var(--pink),-2px 0 var(--cyan)}
+  25%    {text-shadow:-2px 0 var(--pink), 2px 0 var(--cyan)}
+  50%    {text-shadow: 2px 2px var(--pink),-2px -2px var(--cyan)}
+  75%    {text-shadow:-2px 2px var(--pink), 2px -2px var(--cyan)}
+}
+.glitch { animation: glitch 4s infinite; }
+
+/* Scrollbar */
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cyan); }
+
+/* ── Nav ────────────────────────────────────────────────── */
+#lnav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  padding: 0 48px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: background 0.3s, border-color 0.3s;
+  border-bottom: 1px solid transparent;
+}
+#lnav.scrolled {
+  background: rgba(5,8,16,0.96);
+  backdrop-filter: blur(14px);
+  border-bottom-color: var(--border);
+}
+.lnav-logo {
+  font-family: var(--font-hd);
+  font-weight: 900;
+  font-size: 1rem;
+  letter-spacing: 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-decoration: none;
+  line-height: 1.1;
+}
+.lnav-logo small {
+  display: block;
+  font-size: 0.5rem;
+  letter-spacing: 4px;
+  color: var(--muted);
+  -webkit-text-fill-color: var(--muted);
+  font-family: var(--font-mono);
+  font-weight: 400;
+}
+.lnav-links {
+  display: flex;
+  gap: 32px;
+  list-style: none;
+}
+.lnav-links a {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 2px;
+  transition: color 0.2s;
+}
+.lnav-links a:hover { color: var(--cyan); }
+.discord-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #5865f2, #4752c4);
+  border-radius: 4px;
+  font-family: var(--font-hd);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 0 20px rgba(88,101,242,0.3);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.discord-nav-btn:hover {
+  box-shadow: 0 0 30px rgba(88,101,242,0.55);
+  transform: translateY(-1px);
+}
+.lnav-burger {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 7px;
+  cursor: pointer;
+  width: 36px; height: 36px;
+  align-items: center;
+  justify-content: center;
+}
+.lnav-burger span {
+  display: block;
+  width: 16px; height: 2px;
+  background: var(--cyan);
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+.lmobile-menu {
+  display: none;
+  flex-direction: column;
+  padding: 12px 48px 20px;
+  background: rgba(5,8,16,0.98);
+  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  position: fixed;
+  top: 64px; left: 0; right: 0;
+  z-index: 999;
+}
+.lmobile-menu.open { display: flex; }
+.lmobile-menu a {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--muted);
+  text-decoration: none;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+.lmobile-menu a:hover { color: var(--cyan); }
+.lmobile-menu .discord-nav-btn { margin-top: 8px; justify-content: center; }
+
+/* ── Hero ───────────────────────────────────────────────── */
+.hero-section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 100px 48px 80px;
+  position: relative;
+}
+.hero-wrap {
+  max-width: 1200px;
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 64px;
+  align-items: center;
+}
+.h-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border: 1px solid rgba(0,245,255,0.2);
+  border-radius: 20px;
+  background: rgba(0,245,255,0.04);
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  color: var(--cyan);
+  letter-spacing: 2px;
+  margin-bottom: 24px;
+}
+.eyebrow-dot {
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+.hero-h1 {
+  font-family: var(--font-hd);
+  font-size: 4.2rem;
+  font-weight: 900;
+  line-height: 1.0;
+  letter-spacing: -1px;
+  margin-bottom: 20px;
+}
+.hero-h1 em {
+  font-style: normal;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-desc {
+  font-family: var(--font-body);
+  font-size: 1.05rem;
+  color: rgba(226,232,240,0.65);
+  line-height: 1.75;
+  margin-bottom: 32px;
+  max-width: 460px;
+}
+.hero-btns {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 44px;
+  flex-wrap: wrap;
+}
+.btn-hero-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
+  background: linear-gradient(135deg, #5865f2, #4752c4);
+  border-radius: 4px;
+  font-family: var(--font-hd);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 0 25px rgba(88,101,242,0.4);
+  transition: all 0.2s;
+}
+.btn-hero-primary:hover {
+  box-shadow: 0 0 40px rgba(88,101,242,0.65);
+  transform: translateY(-2px);
+}
+.btn-hero-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 13px 22px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--font-hd);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: var(--cyan);
+  text-decoration: none;
+  transition: all 0.2s;
+}
+.btn-hero-ghost:hover {
+  border-color: var(--cyan);
+  background: rgba(0,245,255,0.05);
+}
+.hero-stats { display: flex; gap: 28px; align-items: center; }
+.hstat { text-align: center; }
+.hstat-n { font-family: var(--font-hd); font-size: 1.6rem; font-weight: 900; color: var(--cyan); display: block; }
+.hstat-l { font-family: var(--font-mono); font-size: 0.58rem; color: var(--muted); letter-spacing: 2px; display: block; margin-top: 2px; }
+.hstat-div { width: 1px; height: 40px; background: var(--border); }
+
+/* ── Terminal Card ──────────────────────────────────────── */
+.terminal-card {
+  background: rgba(8,13,26,0.92);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 50px rgba(0,245,255,0.04);
+  position: relative;
+  overflow: visible;
+}
+.tc-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(13,20,38,0.8);
+  border-radius: 10px 10px 0 0;
+}
+.tc-dots { display: flex; gap: 6px; }
+.td { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
+.td-r { background: #ff5f57; }
+.td-y { background: #febc2e; }
+.td-g { background: #28c840; }
+.tc-title { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); flex: 1; text-align: center; letter-spacing: 1px; }
+.tc-badge { font-family: var(--font-mono); font-size: 0.6rem; color: var(--green); letter-spacing: 1px; animation: pulse 2s infinite; }
+.tc-body  { padding: 20px; font-family: var(--font-mono); font-size: 0.78rem; }
+.tc-line  { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
+.tc-prompt{ color: var(--cyan); }
+.tc-cmd   { color: var(--text); }
+.tc-output {
+  background: rgba(0,0,0,0.3);
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.tc-row { display: flex; align-items: center; gap: 8px; font-size: 0.72rem; }
+.tc-ok   .tc-icon { color: var(--green); }
+.tc-proc .tc-icon { color: var(--yellow); }
+.tc-file { color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tc-arrow      { color: var(--muted); flex-shrink: 0; }
+.tc-id         { color: var(--cyan); font-size: 0.68rem; flex-shrink: 0; }
+.tc-processing { color: var(--yellow); font-size: 0.68rem; flex-shrink: 0; }
+@keyframes tcSpin { to { transform: rotate(360deg); } }
+.tc-spin { display: inline-block; animation: tcSpin 1s linear infinite; }
+.tc-progress-wrap { height: 4px; background: rgba(255,255,255,0.05); border-radius: 2px; overflow: hidden; margin-bottom: 10px; }
+.tc-prog-bar {
+  height: 100%;
+  width: 75%;
+  background: linear-gradient(90deg, var(--cyan), var(--pink));
+  border-radius: 2px;
+  animation: tcProg 2.5s ease-in-out infinite;
+}
+@keyframes tcProg { 0%{width:58%} 50%{width:82%} 100%{width:58%} }
+.tc-footer { display: flex; justify-content: space-between; font-size: 0.62rem; color: var(--muted); }
+.tc-ft-r { color: var(--green); }
+
+/* Floating badges */
+.fb {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 14px;
+  background: rgba(8,13,26,0.97);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  font-size: 1rem;
+  white-space: nowrap;
+  z-index: 2;
+  animation: fbFloat 4s ease-in-out infinite;
+}
+.fb-txt .fb-t { font-family: var(--font-mono); font-size: 0.65rem; color: var(--cyan); }
+.fb-txt .fb-s { font-family: var(--font-mono); font-size: 0.58rem; color: var(--muted); }
+.fb-1 { top: -22px; right: -24px; animation-delay: 0s; }
+.fb-2 { bottom: -22px; left: -24px; animation-delay: 1.8s; }
+@keyframes fbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+/* Scroll hint */
+.scroll-hint {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: fbFloat 3s ease-in-out infinite;
+}
+.scroll-line { width: 1px; height: 42px; background: linear-gradient(180deg, transparent, var(--cyan)); }
+.scroll-hint span { font-family: var(--font-mono); font-size: 0.52rem; color: var(--muted); letter-spacing: 4px; }
+
+/* ── Section commons ────────────────────────────────────── */
+.l-section { padding: 100px 48px; position: relative; }
+.l-wrap    { max-width: 1200px; margin: 0 auto; }
+.sec-eyebrow { font-family: var(--font-mono); font-size: 0.65rem; color: var(--cyan); letter-spacing: 3px; margin-bottom: 16px; }
+.sec-h2 { font-family: var(--font-hd); font-size: 2.8rem; font-weight: 900; line-height: 1.15; margin-bottom: 16px; }
+.sec-h2 em { font-style: normal; background: linear-gradient(90deg, var(--cyan), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.sec-sub { font-family: var(--font-body); font-size: 1rem; color: rgba(226,232,240,0.6); max-width: 540px; line-height: 1.75; margin-bottom: 52px; }
+
+/* ── Feature Grid ───────────────────────────────────────── */
+.feat-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.feat-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 26px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s, opacity 0.5s;
+  opacity: 0;
+  transform: translateY(22px);
+}
+.feat-card.vis { opacity: 1; transform: translateY(0); }
+.feat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+  opacity: 0.5;
+}
+.feat-card:hover { border-color: rgba(0,245,255,0.3); box-shadow: 0 8px 30px rgba(0,245,255,0.07); transform: translateY(-4px); }
+.feat-card.fc-wide { grid-column: span 2; }
+.fc-num  { font-family: var(--font-hd); font-size: 0.5rem; color: var(--muted); letter-spacing: 3px; margin-bottom: 14px; }
+.fc-icon { font-size: 1.9rem; margin-bottom: 12px; display: block; }
+.fc-t    { font-family: var(--font-hd); font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: 1px; }
+.fc-d    { font-family: var(--font-body); font-size: 0.9rem; color: rgba(226,232,240,0.6); line-height: 1.65; margin-bottom: 14px; }
+.fc-tag  { font-family: var(--font-mono); font-size: 0.6rem; color: var(--cyan); letter-spacing: 1px; padding: 4px 10px; background: rgba(0,245,255,0.06); border: 1px solid rgba(0,245,255,0.15); border-radius: 3px; display: inline-block; }
+
+/* ── Audio Pipeline ─────────────────────────────────────── */
+.hl-section { padding: 100px 48px; background: rgba(8,13,26,0.5); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.hl-grid { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; }
+.chip-wrap { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+.chip { font-family: var(--font-mono); font-size: 0.65rem; color: var(--cyan); padding: 5px 12px; border: 1px solid rgba(0,245,255,0.2); border-radius: 3px; background: rgba(0,245,255,0.04); letter-spacing: 1px; }
+.pipeline-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 26px; position: relative; overflow: hidden; }
+.pipeline-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), transparent); }
+.pl-title { font-family: var(--font-hd); font-size: 0.6rem; color: var(--cyan); letter-spacing: 3px; margin-bottom: 20px; }
+.pl-steps { display: flex; flex-direction: column; }
+.pl-step {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.04);
+  opacity: 0;
+  transform: translateX(-12px);
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.pl-step.vis { opacity: 1; transform: translateX(0); }
+.pl-step:last-child { border-bottom: none; }
+.pl-dot { width: 10px; height: 10px; border-radius: 50%; border: 2px solid var(--muted); flex-shrink: 0; }
+.pl-active { border-color: var(--cyan); background: rgba(0,245,255,0.2); box-shadow: 0 0 8px rgba(0,245,255,0.4); }
+.pl-info { flex: 1; }
+.pl-name { font-family: var(--font-mono); font-size: 0.72rem; color: var(--text); }
+.pl-desc { font-family: var(--font-mono); font-size: 0.6rem; color: var(--muted); margin-top: 2px; }
+.pl-badge { font-family: var(--font-hd); font-size: 0.5rem; font-weight: 700; padding: 3px 8px; border-radius: 3px; border: 1px solid #444; color: var(--muted); letter-spacing: 1px; flex-shrink: 0; }
+.pl-b-cyan   { border-color: rgba(0,245,255,0.3);   color: var(--cyan);   background: rgba(0,245,255,0.06);   }
+.pl-b-purple { border-color: rgba(168,85,247,0.3);  color: var(--purple); background: rgba(168,85,247,0.06); }
+.pl-b-green  { border-color: rgba(0,255,159,0.3);   color: var(--green);  background: rgba(0,255,159,0.06);  }
+
+/* ── Pricing ────────────────────────────────────────────── */
+.lp-pricing-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.lp-price-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s, box-shadow 0.3s, opacity 0.5s;
+  opacity: 0;
+  transform: translateY(22px);
+}
+.lp-price-card.vis { opacity: 1; transform: translateY(0); }
+.lp-price-card:hover { transform: translateY(-5px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+.lp-price-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+.lp-price-card.pc-gold { border-color: rgba(255,215,0,0.3); background: linear-gradient(180deg, rgba(255,215,0,0.05) 0%, var(--bg2) 100%); }
+.lp-price-card.pc-gold::before { background: linear-gradient(90deg, transparent, var(--yellow), transparent); }
+.pc-hot-badge { position: absolute; top: 12px; right: 12px; font-family: var(--font-hd); font-size: 0.5rem; font-weight: 700; color: #000; background: var(--yellow); padding: 3px 8px; border-radius: 2px; letter-spacing: 1px; }
+.pc-tier-label { font-family: var(--font-hd); font-size: 0.5rem; color: var(--muted); letter-spacing: 3px; margin-bottom: 10px; }
+.pc-name       { font-family: var(--font-hd); font-size: 1.2rem; font-weight: 900; margin-bottom: 4px; }
+.pc-name.free   { color: #888; }
+.pc-name.bronze { color: #cd7f32; }
+.pc-name.silver { color: #c0c0c0; }
+.pc-name.gold   { color: var(--yellow); }
+.pc-quota       { font-family: var(--font-hd); font-size: 1.9rem; font-weight: 900; color: var(--text); margin-bottom: 2px; }
+.pc-quota-unit  { font-family: var(--font-mono); font-size: 0.62rem; color: var(--muted); letter-spacing: 1px; display: block; margin-bottom: 16px; }
+.pc-divider     { height: 1px; background: var(--border); margin-bottom: 16px; }
+.pc-list { list-style: none; display: flex; flex-direction: column; gap: 9px; margin-bottom: 20px; font-family: var(--font-mono); font-size: 0.68rem; }
+.pc-list li { display: flex; align-items: flex-start; gap: 7px; }
+.pc-list .ok { color: var(--muted); }
+.pc-list .ok::before { content: '✓'; color: var(--green); font-weight: 700; flex-shrink: 0; }
+.pc-list .no { color: rgba(74,85,104,0.5); }
+.pc-list .no::before { content: '✗'; color: rgba(255,45,120,0.35); flex-shrink: 0; }
+.pc-btn { display: block; text-align: center; padding: 10px 12px; border-radius: 4px; font-family: var(--font-hd); font-size: 0.58rem; font-weight: 700; letter-spacing: 1.5px; text-decoration: none; transition: all 0.2s; }
+.pc-btn-ghost  { border: 1px solid var(--border); color: var(--muted); }
+.pc-btn-ghost:hover  { border-color: var(--cyan); color: var(--cyan); background: rgba(0,245,255,0.05); }
+.pc-btn-bronze { border: 1px solid rgba(205,127,50,0.4); color: #cd7f32; background: rgba(205,127,50,0.06); }
+.pc-btn-bronze:hover { background: rgba(205,127,50,0.12); }
+.pc-btn-silver { border: 1px solid rgba(192,192,192,0.4); color: #c0c0c0; background: rgba(192,192,192,0.06); }
+.pc-btn-silver:hover { background: rgba(192,192,192,0.12); }
+.pc-btn-gold   { background: linear-gradient(135deg, var(--yellow), #cc9900); color: #000; border: none; box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+.pc-btn-gold:hover { box-shadow: 0 0 36px rgba(255,215,0,0.5); transform: translateY(-1px); }
+
+/* ── How-to Steps ───────────────────────────────────────── */
+.steps-wrap { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 0; align-items: start; }
+.step-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 30px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+.step-card.vis { opacity: 1; transform: translateY(0); }
+.step-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--cyan), var(--pink)); }
+.step-num   { font-family: var(--font-hd); font-size: 0.5rem; color: var(--muted); letter-spacing: 3px; margin-bottom: 14px; }
+.step-icon  { font-size: 2.2rem; margin-bottom: 14px; display: block; }
+.step-title { font-family: var(--font-hd); font-size: 0.85rem; font-weight: 700; color: var(--text); margin-bottom: 10px; letter-spacing: 1px; }
+.step-desc  { font-family: var(--font-body); font-size: 0.9rem; color: rgba(226,232,240,0.6); line-height: 1.65; }
+.step-connector { display: flex; align-items: flex-start; justify-content: center; padding-top: 56px; }
+.step-line { width: 44px; height: 1px; background: linear-gradient(90deg, var(--cyan), var(--pink)); position: relative; }
+.step-line::after { content: '▶'; position: absolute; right: -10px; top: -8px; font-size: 0.68rem; color: var(--pink); }
+
+/* ── CTA Section ────────────────────────────────────────── */
+.cta-section { padding: 80px 48px; }
+.cta-card {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--bg2);
+  border: 1px solid rgba(0,245,255,0.15);
+  border-radius: 12px;
+  padding: 70px 48px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.cta-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--cyan), var(--pink), transparent); }
+.cta-glow { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 700px; height: 200px; background: radial-gradient(ellipse, rgba(0,245,255,0.05) 0%, transparent 70%); pointer-events: none; }
+.cta-tag  { font-family: var(--font-mono); font-size: 0.65rem; color: var(--cyan); letter-spacing: 3px; margin-bottom: 18px; }
+.cta-h    { font-family: var(--font-hd); font-size: 2.8rem; font-weight: 900; line-height: 1.2; margin-bottom: 16px; }
+.cta-h em { font-style: normal; background: linear-gradient(90deg, var(--cyan), var(--pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.cta-p  { font-family: var(--font-body); font-size: 1rem; color: rgba(226,232,240,0.6); margin-bottom: 38px; }
+.btn-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 34px;
+  background: linear-gradient(135deg, #5865f2, #4752c4);
+  border-radius: 4px;
+  font-family: var(--font-hd);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  color: #fff;
+  text-decoration: none;
+  box-shadow: 0 0 30px rgba(88,101,242,0.4);
+  transition: all 0.2s;
+}
+.btn-cta:hover { box-shadow: 0 0 50px rgba(88,101,242,0.65); transform: translateY(-2px); }
+
+/* ── Footer ─────────────────────────────────────────────── */
+footer.lfoot { padding: 52px 48px 32px; border-top: 1px solid var(--border); }
+.foot-inner  { max-width: 1200px; margin: 0 auto; }
+.foot-grid   { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; margin-bottom: 40px; }
+.foot-brand p { font-family: var(--font-body); font-size: 0.9rem; color: var(--muted); line-height: 1.7; max-width: 320px; margin-top: 14px; }
+.foot-links  { display: flex; gap: 60px; }
+.fn-group    { display: flex; flex-direction: column; gap: 10px; }
+.fn-title    { font-family: var(--font-hd); font-size: 0.52rem; letter-spacing: 3px; color: var(--muted); margin-bottom: 4px; }
+.fn-group a  { font-family: var(--font-mono); font-size: 0.72rem; color: rgba(74,85,104,0.8); text-decoration: none; transition: color 0.2s; }
+.fn-group a:hover { color: var(--cyan); }
+.foot-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 0.65rem; color: var(--muted); flex-wrap: wrap; gap: 8px; }
+
+/* ── Responsive ─────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  .hero-h1    { font-size: 3.2rem; }
+  .hero-wrap  { grid-template-columns: 1fr; gap: 48px; }
+  .feat-grid  { grid-template-columns: repeat(2,1fr); }
+  .feat-card.fc-wide { grid-column: span 2; }
+  .lp-pricing-grid { grid-template-columns: repeat(2,1fr); }
+  .hl-grid    { grid-template-columns: 1fr; gap: 40px; }
+  .steps-wrap { grid-template-columns: 1fr; gap: 20px; }
+  .step-connector { display: none; }
+  #lnav       { padding: 0 24px; }
+  .l-section, .hl-section { padding: 70px 24px; }
+  .cta-section { padding: 60px 24px; }
+  footer.lfoot { padding: 44px 24px 24px; }
+}
+@media (max-width: 768px) {
+  .hero-h1 { font-size: 2.4rem; }
+  .sec-h2  { font-size: 2rem; }
+  .lnav-links, .lnav-cta { display: none; }
+  .lnav-burger { display: flex; }
+  .feat-grid { grid-template-columns: 1fr; }
+  .feat-card.fc-wide { grid-column: span 1; }
+  .lp-pricing-grid { grid-template-columns: 1fr 1fr; }
+  .foot-grid { grid-template-columns: 1fr; gap: 28px; }
+  .hero-section { padding: 80px 20px 70px; }
+  .l-section, .hl-section { padding: 60px 20px; }
+  .cta-section { padding: 60px 20px; }
+  .cta-h { font-size: 2rem; }
+  footer.lfoot { padding: 40px 20px 20px; }
+  .fb-1, .fb-2 { display: none; }
+}
+@media (max-width: 480px) {
+  .hero-h1 { font-size: 2rem; }
+  .lp-pricing-grid { grid-template-columns: 1fr; }
+  .lmobile-menu { padding: 12px 24px 20px; }
+  .cta-card { padding: 48px 24px; }
+  .foot-links { flex-direction: column; gap: 24px; }
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- Floating orbs background -->
+<div style="position:fixed;top:15%;left:5%;width:500px;height:500px;background:radial-gradient(circle,rgba(0,245,255,0.05),transparent 70%);border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orb1 8s ease-in-out infinite"></div>
+<div style="position:fixed;bottom:10%;right:5%;width:600px;height:600px;background:radial-gradient(circle,rgba(255,45,120,0.05),transparent 70%);border-radius:50%;filter:blur(80px);pointer-events:none;z-index:0;animation:orb2 10s ease-in-out infinite"></div>
+
+<!-- ══════════ NAV ══════════ -->
+<nav id="lnav">
+  <a href="#" class="lnav-logo">PENDOSA<small>BYPASS AUDIO</small></a>
+  <ul class="lnav-links">
+    <li><a href="#fitur">FITUR</a></li>
+    <li><a href="#harga">HARGA</a></li>
+    <li><a href="#cara-pakai">CARA PAKAI</a></li>
+  </ul>
+  <a href="/auth/discord" class="discord-nav-btn lnav-cta">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.09.119 18.12.143 18.14c2.053 1.508 4.041 2.423 5.993 3.029a.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.029.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+    LOGIN DISCORD
+  </a>
+  <button class="lnav-burger" id="lburger" onclick="toggleLMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- Mobile menu -->
+<div class="lmobile-menu" id="lMobileMenu">
+  <a href="#fitur" onclick="toggleLMenu()">FITUR</a>
+  <a href="#harga" onclick="toggleLMenu()">HARGA</a>
+  <a href="#cara-pakai" onclick="toggleLMenu()">CARA PAKAI</a>
+  <a href="/auth/discord" class="discord-nav-btn">LOGIN DISCORD</a>
+</div>
+
+<!-- ══════════ HERO ══════════ -->
+<section class="hero-section" style="z-index:1;position:relative">
+  <div class="hero-wrap">
+    <!-- Left -->
+    <div>
+      <div class="h-eyebrow">
+        <span class="eyebrow-dot"></span>
+        PLATFORM UPLOAD AUDIO ROBLOX #1
+      </div>
+      <h1 class="hero-h1">Upload Audio<br><em class="glitch">ROBLOX</em><br>Tanpa Batas</h1>
+      <p class="hero-desc">Convert, process, dan upload file audio langsung ke Roblox. Dengan FFmpeg pipeline, bulk upload, waveform preview — semua dalam satu platform.</p>
+      <div class="hero-btns">
+        <a href="/auth/discord" class="btn-hero-primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.09.119 18.12.143 18.14c2.053 1.508 4.041 2.423 5.993 3.029a.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.029.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+          DAFTAR GRATIS
+        </a>
+        <a href="#fitur" class="btn-hero-ghost">LIHAT FITUR →</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat">
+          <span class="hstat-n">500+</span>
+          <span class="hstat-l">UPLOAD/BULAN</span>
+        </div>
+        <div class="hstat-div"></div>
+        <div class="hstat">
+          <span class="hstat-n" style="color:var(--pink)">4</span>
+          <span class="hstat-l">TIER PILIHAN</span>
+        </div>
+        <div class="hstat-div"></div>
+        <div class="hstat">
+          <span class="hstat-n" style="color:var(--green)">24H</span>
+          <span class="hstat-l">KONFIRMASI</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Terminal card -->
+    <div>
+      <div class="terminal-card">
+        <div class="tc-bar">
+          <div class="tc-dots">
+            <span class="td td-r"></span>
+            <span class="td td-y"></span>
+            <span class="td td-g"></span>
+          </div>
+          <span class="tc-title">pendosa-bypass-audio — uploader</span>
+          <span class="tc-badge">● LIVE</span>
+        </div>
+        <div class="tc-body">
+          <div class="tc-line">
+            <span class="tc-prompt">$</span>
+            <span class="tc-cmd">pendosa upload --tempo=2x --pitch=+3 --batch</span>
+          </div>
+          <div class="tc-output">
+            <div class="tc-row tc-ok">
+              <span class="tc-icon">✓</span>
+              <span class="tc-file">bgm_boss_fight.mp3</span>
+              <span class="tc-arrow">→</span>
+              <span class="tc-id">132847569</span>
+            </div>
+            <div class="tc-row tc-ok">
+              <span class="tc-icon">✓</span>
+              <span class="tc-file">theme_lobby.mp3</span>
+              <span class="tc-arrow">→</span>
+              <span class="tc-id">132847571</span>
+            </div>
+            <div class="tc-row tc-ok">
+              <span class="tc-icon">✓</span>
+              <span class="tc-file">ambience_rain.mp3</span>
+              <span class="tc-arrow">→</span>
+              <span class="tc-id">132847574</span>
+            </div>
+            <div class="tc-row tc-proc">
+              <span class="tc-icon tc-spin">◌</span>
+              <span class="tc-file">victory_fanfare.mp3</span>
+              <span class="tc-arrow">→</span>
+              <span class="tc-processing">processing...</span>
+            </div>
+          </div>
+          <div class="tc-progress-wrap">
+            <div class="tc-prog-bar"></div>
+          </div>
+          <div class="tc-footer">
+            <span>⚡ FFmpeg · atempo=2.0 · 192kbps · 44100Hz</span>
+            <span class="tc-ft-r">3/4 sukses</span>
+          </div>
+        </div>
+        <!-- Floating badges -->
+        <div class="fb fb-1">
+          <span>🎚️</span>
+          <div class="fb-txt">
+            <div class="fb-t">Pitch +3st</div>
+            <div class="fb-s">asetrate · 44100Hz</div>
+          </div>
+        </div>
+        <div class="fb fb-2">
+          <span>✅</span>
+          <div class="fb-txt">
+            <div class="fb-t">Upload Sukses</div>
+            <div class="fb-s">ID: 132847569</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    <span>SCROLL</span>
+  </div>
+</section>
+
+<!-- ══════════ FEATURES ══════════ -->
+<section class="l-section" id="fitur" style="z-index:1;position:relative">
+  <div class="l-wrap">
+    <div class="sec-eyebrow">// 01 FITUR UNGGULAN</div>
+    <h2 class="sec-h2">Semua yang kamu butuhkan<br><em>dalam satu platform</em></h2>
+    <p class="sec-sub">Dirancang untuk kreator Roblox yang serius. Bukan sekadar uploader — ini studio produksi audio kamu.</p>
+
+    <div class="feat-grid">
+      <div class="feat-card fc-wide">
+        <div class="fc-num">01</div>
+        <span class="fc-icon">⚡</span>
+        <div class="fc-t">Bulk Upload</div>
+        <div class="fc-d">Upload puluhan file MP3 sekaligus dengan antrian otomatis dan retry 3× per file. Progress live via SSE streaming langsung di browser.</div>
+        <span class="fc-tag">Multi-file · Auto retry · Live progress</span>
+      </div>
+      <div class="feat-card">
+        <div class="fc-num">02</div>
+        <span class="fc-icon">🎛️</span>
+        <div class="fc-t">FFmpeg Processing</div>
+        <div class="fc-d">Speed tempo, pitch shift, volume normalization — semua diproses otomatis sebelum upload ke Roblox.</div>
+        <span class="fc-tag">FFmpeg · 192kbps · 44100Hz</span>
+      </div>
+      <div class="feat-card">
+        <div class="fc-num">03</div>
+        <span class="fc-icon">🎧</span>
+        <div class="fc-t">Waveform Preview</div>
+        <div class="fc-d">Canvas waveform visualizer dan audio player langsung di browser. Preview sebelum upload ke Roblox.</div>
+        <span class="fc-tag">Real-time · Canvas API</span>
+      </div>
+      <div class="feat-card">
+        <div class="fc-num">04</div>
+        <span class="fc-icon">👥</span>
+        <div class="fc-t">Group &amp; Personal</div>
+        <div class="fc-d">Upload ke akun personal maupun Group Roblox. Switch mode kapan saja dari halaman Settings dengan API Key yang aman.</div>
+        <span class="fc-tag">Multi-mode · API Key aman</span>
+      </div>
+      <div class="feat-card fc-wide">
+        <div class="fc-num">05</div>
+        <span class="fc-icon">✂️</span>
+        <div class="fc-t">Audio Editor + YouTube Downloader</div>
+        <div class="fc-d">Trim, fade in/out langsung di browser. Download audio dari YouTube &amp; SoundCloud otomatis jadi MP3 siap upload.</div>
+        <span class="fc-tag">Trim · Fade · YT/SC Download</span>
+      </div>
+      <div class="feat-card">
+        <div class="fc-num">06</div>
+        <span class="fc-icon">💰</span>
+        <div class="fc-t">Bayar via DANA</div>
+        <div class="fc-d">Upgrade tier mudah. Transfer ke admin, upload bukti bayar, dan tier naik dalam 24 jam. Tidak perlu kartu kredit.</div>
+        <span class="fc-tag">DANA · 24H konfirmasi</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ AUDIO PIPELINE ══════════ -->
+<section class="hl-section" style="position:relative;z-index:1">
+  <div class="hl-grid">
+    <div>
+      <div class="sec-eyebrow">// 02 AUDIO PROCESSING</div>
+      <h2 class="sec-h2" style="margin-bottom:14px">Kualitas Terbaik<br><em>di Roblox Studio</em></h2>
+      <p class="sec-sub" style="margin-bottom:20px">Pipeline FFmpeg yang dioptimasi khusus untuk Roblox. Bitrate 192kbps, 44100Hz, dengan EQ dan normalisasi -16 LUFS — standar game audio profesional.</p>
+      <div class="chip-wrap">
+        <span class="chip">atempo chain 0.5–16×</span>
+        <span class="chip">Pitch ±24 semitone</span>
+        <span class="chip">EQ 5-band</span>
+        <span class="chip">-16 LUFS normalisasi</span>
+        <span class="chip">192kbps output</span>
+        <span class="chip">44100Hz stereo</span>
+      </div>
+      <a href="/auth/discord" class="btn-hero-primary" style="margin-top:28px;display:inline-flex">COBA SEKARANG →</a>
+    </div>
+    <div>
+      <div class="pipeline-card">
+        <div class="pl-title">▸ FFMPEG PIPELINE</div>
+        <div class="pl-steps">
+          <div class="pl-step">
+            <div class="pl-dot"></div>
+            <div class="pl-info"><div class="pl-name">Input</div><div class="pl-desc">MP3 original file</div></div>
+            <div class="pl-badge">IN</div>
+          </div>
+          <div class="pl-step">
+            <div class="pl-dot pl-active"></div>
+            <div class="pl-info"><div class="pl-name">EQ + Filter</div><div class="pl-desc">highpass · lowpass · 5-band EQ</div></div>
+            <div class="pl-badge pl-b-cyan">EQ</div>
+          </div>
+          <div class="pl-step">
+            <div class="pl-dot pl-active"></div>
+            <div class="pl-info"><div class="pl-name">Pitch Shift</div><div class="pl-desc">asetrate · aresample precision=28</div></div>
+            <div class="pl-badge pl-b-purple">PITCH</div>
+          </div>
+          <div class="pl-step">
+            <div class="pl-dot pl-active"></div>
+            <div class="pl-info"><div class="pl-name">Tempo Change</div><div class="pl-desc">atempo chain · 0.5x per node</div></div>
+            <div class="pl-badge pl-b-cyan">TEMPO</div>
+          </div>
+          <div class="pl-step">
+            <div class="pl-dot pl-active"></div>
+            <div class="pl-info"><div class="pl-name">Loudnorm</div><div class="pl-desc">-16 LUFS · TP -1.0dBFS</div></div>
+            <div class="pl-badge pl-b-green">NORM</div>
+          </div>
+          <div class="pl-step">
+            <div class="pl-dot"></div>
+            <div class="pl-info"><div class="pl-name">Output</div><div class="pl-desc">192kbps · 44100Hz · Roblox ready</div></div>
+            <div class="pl-badge pl-b-green">OUT</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ PRICING ══════════ -->
+<section class="l-section" id="harga" style="position:relative;z-index:1">
+  <div class="l-wrap">
+    <div class="sec-eyebrow">// 03 PAKET &amp; HARGA</div>
+    <h2 class="sec-h2">Mulai gratis,<br><em>upgrade kapan saja</em></h2>
+    <p class="sec-sub">Transfer via DANA ke admin. Tier langsung naik dalam 24 jam setelah konfirmasi pembayaran.</p>
+
+    <div class="lp-pricing-grid">
+      <!-- FREE -->
+      <div class="lp-price-card">
+        <div class="pc-tier-label">TIER 01</div>
+        <div class="pc-name free">FREE</div>
+        <div class="pc-quota">50</div>
+        <div class="pc-quota-unit">upload / bulan</div>
+        <div class="pc-divider"></div>
+        <ul class="pc-list">
+          <li class="ok">Bulk upload (maks 50/bulan)</li>
+          <li class="ok">Audio preview + waveform</li>
+          <li class="ok">Personal &amp; Group upload</li>
+          <li class="ok">Discord login otomatis</li>
+          <li class="no">Audio processing</li>
+          <li class="no">Priority support</li>
+        </ul>
+        <a href="/auth/discord" class="pc-btn pc-btn-ghost">DAFTAR GRATIS</a>
+      </div>
+      <!-- BRONZE -->
+      <div class="lp-price-card">
+        <div class="pc-tier-label">TIER 02</div>
+        <div class="pc-name bronze">BRONZE</div>
+        <div class="pc-quota">200</div>
+        <div class="pc-quota-unit">upload / bulan</div>
+        <div class="pc-divider"></div>
+        <ul class="pc-list">
+          <li class="ok">Bulk upload (maks 200/bulan)</li>
+          <li class="ok">Audio preview + waveform</li>
+          <li class="ok">Personal &amp; Group upload</li>
+          <li class="ok">Audio processing (tempo/pitch)</li>
+          <li class="ok">Discord login otomatis</li>
+          <li class="no">Priority support</li>
+        </ul>
+        <a href="/auth/discord" class="pc-btn pc-btn-bronze">DAPATKAN AKSES</a>
+      </div>
+      <!-- SILVER -->
+      <div class="lp-price-card">
+        <div class="pc-tier-label">TIER 03</div>
+        <div class="pc-name silver">SILVER</div>
+        <div class="pc-quota">500</div>
+        <div class="pc-quota-unit">upload / bulan</div>
+        <div class="pc-divider"></div>
+        <ul class="pc-list">
+          <li class="ok">Bulk upload (maks 500/bulan)</li>
+          <li class="ok">Audio preview + waveform</li>
+          <li class="ok">Personal &amp; Group upload</li>
+          <li class="ok">Audio processing (tempo/pitch)</li>
+          <li class="ok">Audio editor + YT download</li>
+          <li class="no">Priority support</li>
+        </ul>
+        <a href="/auth/discord" class="pc-btn pc-btn-silver">DAPATKAN AKSES</a>
+      </div>
+      <!-- GOLD -->
+      <div class="lp-price-card pc-gold">
+        <div class="pc-hot-badge">⭐ BEST</div>
+        <div class="pc-tier-label">TIER 04</div>
+        <div class="pc-name gold">GOLD</div>
+        <div class="pc-quota">∞</div>
+        <div class="pc-quota-unit">unlimited</div>
+        <div class="pc-divider"></div>
+        <ul class="pc-list">
+          <li class="ok">Upload unlimited</li>
+          <li class="ok">Audio preview + waveform</li>
+          <li class="ok">Personal &amp; Group upload</li>
+          <li class="ok">Audio processing (tempo/pitch)</li>
+          <li class="ok">Audio editor + YT download</li>
+          <li class="ok">Priority support</li>
+        </ul>
+        <a href="/auth/discord" class="pc-btn pc-btn-gold">DAPATKAN AKSES</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ HOW IT WORKS ══════════ -->
+<section class="l-section" id="cara-pakai" style="background:rgba(8,13,26,0.45);border-top:1px solid var(--border);position:relative;z-index:1">
+  <div class="l-wrap">
+    <div class="sec-eyebrow">// 04 CARA PAKAI</div>
+    <h2 class="sec-h2">Mulai dalam<br><em>3 langkah mudah</em></h2>
+    <div class="steps-wrap">
+      <div class="step-card">
+        <div class="step-num">01</div>
+        <span class="step-icon">📝</span>
+        <div class="step-title">Login Discord</div>
+        <div class="step-desc">Login dengan Discord account kamu. Akun dibuat otomatis — tidak perlu form, tidak perlu password.</div>
+      </div>
+      <div class="step-connector"><div class="step-line"></div></div>
+      <div class="step-card">
+        <div class="step-num">02</div>
+        <span class="step-icon">🔗</span>
+        <div class="step-title">Hubungkan Roblox</div>
+        <div class="step-desc">Masukkan Roblox API Key dan User/Group ID di halaman Settings. Data aman tersimpan di server.</div>
+      </div>
+      <div class="step-connector"><div class="step-line"></div></div>
+      <div class="step-card">
+        <div class="step-num">03</div>
+        <span class="step-icon">🚀</span>
+        <div class="step-title">Upload &amp; Selesai</div>
+        <div class="step-desc">Drag &amp; drop MP3, atur tempo/pitch, preview waveform, lalu upload langsung ke Roblox dalam sekejap.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ CTA ══════════ -->
+<section class="cta-section" style="position:relative;z-index:1">
+  <div class="cta-card">
+    <div class="cta-glow"></div>
+    <div class="cta-tag">// MULAI SEKARANG</div>
+    <h2 class="cta-h">Siap upload audio ke<br><em>Roblox lebih cepat?</em></h2>
+    <p class="cta-p">Gratis untuk dicoba. Upgrade kapan saja via DANA. Tidak perlu kartu kredit.</p>
+    <a href="/auth/discord" class="btn-cta">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057.1 18.09.119 18.12.143 18.14c2.053 1.508 4.041 2.423 5.993 3.029a.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.029.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z"/></svg>
+      DAFTAR GRATIS DENGAN DISCORD
+    </a>
+  </div>
+</section>
+
+<!-- ══════════ FOOTER ══════════ -->
+<footer class="lfoot" style="position:relative;z-index:1">
+  <div class="foot-inner">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="lnav-logo" style="font-size:1.05rem">PENDOSA<small>BYPASS AUDIO</small></div>
+        <p>Platform upload audio Roblox terbaik. Bulk upload, audio processing, dan manajemen aset — semua dalam satu tempat.</p>
+      </div>
+      <div class="foot-links">
+        <div class="fn-group">
+          <div class="fn-title">PLATFORM</div>
+          <a href="#fitur">Fitur</a>
+          <a href="#harga">Harga</a>
+          <a href="#cara-pakai">Cara Pakai</a>
+        </div>
+        <div class="fn-group">
+          <div class="fn-title">AKUN</div>
+          <a href="/auth/discord">Login Discord</a>
+          <a href="/auth/discord">Daftar Gratis</a>
+        </div>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 PENDOSA BYPASS AUDIO · Roblox Audio Platform</span>
+      <span>Built with ⚡ for Roblox Creators</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── Nav scroll blur ─────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('lnav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ── Mobile menu toggle ──────────────────────────────────────
+function toggleLMenu() {
+  const menu   = document.getElementById('lMobileMenu');
+  const burger = document.getElementById('lburger');
+  menu.classList.toggle('open');
+  burger.classList.toggle('open');
+  document.body.style.overflow = menu.classList.contains('open') ? 'hidden' : '';
+}
+
+// Close menu when clicking outside
+document.addEventListener('click', (e) => {
+  const menu   = document.getElementById('lMobileMenu');
+  const burger = document.getElementById('lburger');
+  const nav    = document.getElementById('lnav');
+  if (menu.classList.contains('open') && !nav.contains(e.target) && !menu.contains(e.target)) {
+    menu.classList.remove('open');
+    burger.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+});
+
+// ── Scroll-reveal animation ─────────────────────────────────
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry) => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('vis');
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.feat-card, .lp-price-card, .step-card, .pl-step').forEach((el, i) => {
+  el.style.transitionDelay = `${(i % 4) * 70}ms`;
+  observer.observe(el);
+});
+</script>
+</body>
+</html>
