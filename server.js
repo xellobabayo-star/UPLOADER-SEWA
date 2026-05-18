@@ -350,7 +350,6 @@ app.get("/api/admin/payments", requireAuth, requireAdmin, (req, res) => {
 
 app.patch("/api/admin/payments/:id", requireAuth, requireAdmin, (req, res) => {
   const { action, note } = req.body; // action: approve | reject
-  const adminIds = (process.env.ADMIN_DISCORD_IDS || "").split(",").map(s => s.trim());
   const payment = db.prepare("SELECT * FROM payment_requests WHERE id=?").get(req.params.id);
   if (!payment) return res.status(404).json({ error: "Payment tidak ditemukan" });
   if (payment.status !== "pending") return res.status(400).json({ error: "Payment sudah diproses" });
@@ -382,7 +381,25 @@ app.delete("/api/admin/logs", requireAuth, requireAdmin, (req, res) => {
 // ── Serve proof uploads ──────────────────────────────────────
 app.use("/uploads", requireAuth, express.static(UPLOAD_DIR));
 
-// ── Catch-all → SPA ─────────────────────────────────────────
+// ════════════════════════════════════════════════════════════
+// PAGE ROUTES
+// ════════════════════════════════════════════════════════════
+
+// ── Landing page — "/" ───────────────────────────────────────
+// Kalau sudah login → langsung ke /dashboard
+// Kalau belum login → tampil landing.html
+app.get("/", (req, res) => {
+  if (req.isAuthenticated()) return res.redirect("/dashboard");
+  res.sendFile(path.join(__dirname, "public", "landing.html"));
+});
+
+// ── Dashboard app — "/dashboard" ────────────────────────────
+// Selalu serve index.html, auth dicek oleh init() di frontend
+app.get("/dashboard", (req, res) => {
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
+// ── Catch-all → dashboard app (untuk SPA internal routes) ───
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
 });
